@@ -164,10 +164,6 @@ If startup causes high `syspolicyd` / `trustd` CPU on Intel Macs:
 | --- | --- | --- |
 | Fork Owner & Maintainer | Krisada | [@krisadas](https://github.com/krisadas) |
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Yeachan-Heo/oh-my-codex&type=date&legend=top-left)](https://www.star-history.com/#Yeachan-Heo/oh-my-codex&type=date&legend=top-left)
-
 ## License
 
 MIT
