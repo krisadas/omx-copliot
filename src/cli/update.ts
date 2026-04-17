@@ -20,8 +20,12 @@ interface LatestPackageInfo {
   version?: string;
 }
 
-const PACKAGE_NAME = 'oh-my-codex';
 const CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12h
+
+interface PackageMetadata {
+  name: string;
+  version: string;
+}
 
 function parseSemver(version: string): [number, number, number] | null {
   const m = version.trim().match(/^v?(\d+)\.(\d+)\.(\d+)$/);
@@ -70,8 +74,8 @@ async function writeUpdateState(cwd: string, state: UpdateState): Promise<void> 
   await writeFile(updateStatePath(cwd), JSON.stringify(state, null, 2));
 }
 
-async function fetchLatestVersion(timeoutMs = 3500): Promise<string | null> {
-  const registryUrl = `https://registry.npmjs.org/${PACKAGE_NAME}/latest`;
+async function fetchLatestVersion(packageName: string, timeoutMs = 3500): Promise<string | null> {
+  const registryUrl = `https://registry.npmjs.org/${packageName}/latest`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -86,19 +90,22 @@ async function fetchLatestVersion(timeoutMs = 3500): Promise<string | null> {
   }
 }
 
-async function getCurrentVersion(): Promise<string | null> {
+async function getCurrentPackageMetadata(): Promise<PackageMetadata | null> {
   try {
     const pkgPath = join(getPackageRoot(), 'package.json');
     const content = await readFile(pkgPath, 'utf-8');
-    const pkg = JSON.parse(content) as { version?: string };
-    return typeof pkg.version === 'string' ? pkg.version : null;
+    const pkg = JSON.parse(content) as { name?: string; version?: string };
+    if (typeof pkg.name !== 'string' || typeof pkg.version !== 'string') {
+      return null;
+    }
+    return { name: pkg.name, version: pkg.version };
   } catch {
     return null;
   }
 }
 
-function runGlobalUpdate(): { ok: boolean; stderr: string } {
-  const result = spawnSync('npm', ['install', '-g', `${PACKAGE_NAME}@latest`], {
+function runGlobalUpdate(packageName: string): { ok: boolean; stderr: string } {
+  const result = spawnSync('npm', ['install', '-g', `${packageName}@latest`], {
     encoding: 'utf-8',
     stdio: ['ignore', 'ignore', 'pipe'],
     timeout: 120000,
@@ -128,7 +135,7 @@ async function askYesNo(question: string): Promise<boolean> {
 interface UpdateDependencies {
   askYesNo: typeof askYesNo;
   fetchLatestVersion: typeof fetchLatestVersion;
-  getCurrentVersion: typeof getCurrentVersion;
+  getCurrentPackageMetadata: typeof getCurrentPackageMetadata;
   runGlobalUpdate: typeof runGlobalUpdate;
   setup: typeof setup;
 }
@@ -136,7 +143,7 @@ interface UpdateDependencies {
 const defaultUpdateDependencies: UpdateDependencies = {
   askYesNo,
   fetchLatestVersion,
-  getCurrentVersion,
+  getCurrentPackageMetadata,
   runGlobalUpdate,
   setup,
 };
@@ -153,10 +160,11 @@ export async function maybeCheckAndPromptUpdate(
   const state = await readUpdateState(cwd);
   if (!shouldCheckForUpdates(now, state)) return;
 
-  const [current, latest] = await Promise.all([
-    updateDependencies.getCurrentVersion(),
-    updateDependencies.fetchLatestVersion(),
-  ]);
+  const currentPackage = await updateDependencies.getCurrentPackageMetadata();
+  if (!currentPackage) return;
+
+  const { name: packageName, version: current } = currentPackage;
+  const latest = await updateDependencies.fetchLatestVersion(packageName);
 
   await writeUpdateState(cwd, {
     last_checked_at: new Date(now).toISOString(),
@@ -170,13 +178,13 @@ export async function maybeCheckAndPromptUpdate(
   );
   if (!approved) return;
 
-  console.log(`[omxc] Running: npm install -g ${PACKAGE_NAME}@latest`);
-  const result = updateDependencies.runGlobalUpdate();
+  console.log(`[omxc] Running: npm install -g ${packageName}@latest`);
+  const result = updateDependencies.runGlobalUpdate(packageName);
 
   if (result.ok) {
     await updateDependencies.setup({ force: true });
     console.log(`[omxc] Updated to v${latest}. Restart to use new code.`);
   } else {
-    console.log('[omxc] Update failed. Run manually: npm install -g oh-my-codex@latest');
+    console.log(`[omxc] Update failed. Run manually: npm install -g ${packageName}@latest`);
   }
 }

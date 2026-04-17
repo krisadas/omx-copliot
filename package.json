@@ -1,6 +1,6 @@
 {
   "name": "omx-copilot",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Multi-agent orchestration layer for CoPilot CLI",
   "type": "module",
   "main": "dist/index.js",

@@ -128,7 +128,7 @@ describe('maybeCheckAndPromptUpdate', () => {
     try {
       await withInteractiveTty(async () => {
         await maybeCheckAndPromptUpdate(cwd, {
-          getCurrentVersion: async () => '0.8.9',
+          getCurrentPackageMetadata: async () => ({ name: 'omx-copilot', version: '0.8.9' }),
           fetchLatestVersion: async () => '0.9.0',
           askYesNo: async () => true,
           runGlobalUpdate: () => ({ ok: true, stderr: '' }),
@@ -154,7 +154,7 @@ describe('maybeCheckAndPromptUpdate', () => {
     try {
       await withInteractiveTty(async () => {
         await maybeCheckAndPromptUpdate(cwd, {
-          getCurrentVersion: async () => '0.8.9',
+          getCurrentPackageMetadata: async () => ({ name: 'omx-copilot', version: '0.8.9' }),
           fetchLatestVersion: async () => '0.9.0',
           askYesNo: async () => false,
           runGlobalUpdate: () => {
@@ -187,7 +187,7 @@ describe('maybeCheckAndPromptUpdate', () => {
     try {
       await withInteractiveTty(async () => {
         await maybeCheckAndPromptUpdate(cwd, {
-          getCurrentVersion: async () => '0.8.9',
+          getCurrentPackageMetadata: async () => ({ name: 'omx-copilot', version: '0.8.9' }),
           fetchLatestVersion: async () => '0.9.0',
           askYesNo: async () => true,
           runGlobalUpdate: () => ({ ok: false, stderr: 'npm exited 1' }),
@@ -198,7 +198,7 @@ describe('maybeCheckAndPromptUpdate', () => {
       });
 
       assert.equal(setupCalls, 0);
-      assert.match(logs.join('\n'), /Update failed\. Run manually: npm install -g oh-my-codex@latest/);
+      assert.match(logs.join('\n'), /Update failed\. Run manually: npm install -g omx-copilot@latest/);
     } finally {
       console.log = originalLog;
       await rm(cwd, { recursive: true, force: true });
@@ -213,7 +213,7 @@ describe('maybeCheckAndPromptUpdate', () => {
     try {
       await withInteractiveTty(async () => {
         await maybeCheckAndPromptUpdate(cwd, {
-          getCurrentVersion: async () => '0.8.9',
+          getCurrentPackageMetadata: async () => ({ name: 'omx-copilot', version: '0.8.9' }),
           fetchLatestVersion: async () => '0.8.9',
           askYesNo: async () => {
             promptCalls += 1;
