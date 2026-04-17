@@ -31,6 +31,7 @@ const DEFAULT_LIST_LIMIT = 12;
 const IGNORE_DIRECTORY_NAMES = new Set([
   ".git",
   ".omx",
+  ".copilot",
   ".codex",
   "node_modules",
   "dist",
@@ -106,7 +107,9 @@ function wrapManagedContent(body: string, manualBody: string): string {
 export function applyProjectScopePathRewritesToAgentsTemplate(
   content: string,
 ): string {
-  return content.replaceAll("~/.codex", "./.codex");
+  return content
+    .replaceAll("~/.codex", "./.copilot")
+    .replaceAll("./.codex", "./.copilot");
 }
 
 async function readProjectRootTemplate(): Promise<string> {
@@ -335,10 +338,10 @@ export async function agentsInit(
       isRootTarget && targetDir === cwd
         ? await renderManagedProjectRootAgents(existingContent)
         : await renderManagedDirectoryAgents(
-            dir,
-            existingContent,
-            dirname(dir) === targetDir,
-          );
+          dir,
+          existingContent,
+          dirname(dir) === targetDir,
+        );
 
     const rootOverlayRisk =
       rootSessionGuardActive &&

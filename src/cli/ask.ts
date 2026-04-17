@@ -4,7 +4,7 @@ import { readFile, readdir } from 'fs/promises';
 import { isAbsolute, join } from 'path';
 import { constants as osConstants } from 'os';
 import { getPackageRoot } from '../utils/package.js';
-import { codexPromptsDir } from '../utils/paths.js';
+import { codexPromptsDir, projectCodexHomeDir } from '../utils/paths.js';
 
 export const ASK_USAGE = [
   'Usage: omxc ask <claude|gemini> <question or task>',
@@ -44,7 +44,7 @@ function resolveAskPromptsDir(cwd: string, env: NodeJS.ProcessEnv = process.env)
     if (existsSync(scopePath)) {
       const parsed = JSON.parse(readFileSync(scopePath, 'utf-8')) as Partial<{ scope: string }>;
       if (parsed.scope === 'project' || parsed.scope === 'project-local') {
-        return join(cwd, '.codex', 'prompts');
+        return join(projectCodexHomeDir(cwd), 'prompts');
       }
     }
   } catch {

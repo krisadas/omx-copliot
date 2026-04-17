@@ -75,7 +75,12 @@ import {
   isTmuxAvailable,
 } from "../team/tmux-session.js";
 import { getPackageRoot } from "../utils/package.js";
-import { codexConfigPath, rememberOmxLaunchContext, resolveOmxEntryPath } from "../utils/paths.js";
+import {
+  codexConfigPath,
+  projectCodexHomeDir,
+  rememberOmxLaunchContext,
+  resolveOmxEntryPath,
+} from "../utils/paths.js";
 import { repairConfigIfNeeded } from "../config/generator.js";
 import { HUD_TMUX_HEIGHT_LINES } from "../hud/constants.js";
 
@@ -320,7 +325,7 @@ export function resolveCodexHomeForLaunch(
   if (env.CODEX_HOME && env.CODEX_HOME.trim() !== "") return env.CODEX_HOME;
   const persistedScope = readPersistedSetupScope(cwd);
   if (persistedScope === "project") {
-    return join(cwd, ".codex");
+    return projectCodexHomeDir(cwd);
   }
   return undefined;
 }

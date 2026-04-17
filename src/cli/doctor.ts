@@ -7,7 +7,7 @@ import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import {
   codexHome, codexConfigPath, codexPromptsDir,
-  userSkillsDir, projectSkillsDir, omxStateDir, detectLegacySkillRootOverlap,
+  userSkillsDir, projectSkillsDir, omxStateDir, detectLegacySkillRootOverlap, projectCodexHomeDir,
 } from '../utils/paths.js';
 import { classifySpawnError, spawnPlatformCommandSync } from '../utils/platform-command.js';
 import { getCatalogExpectations } from './catalog-contract.js';
@@ -77,7 +77,7 @@ async function resolveDoctorScope(cwd: string): Promise<DoctorScopeResolution> {
 
 function resolveDoctorPaths(cwd: string, scope: DoctorSetupScope): DoctorPaths {
   if (scope === 'project') {
-    const codexHomeDir = join(cwd, '.codex');
+    const codexHomeDir = projectCodexHomeDir(cwd);
     return {
       codexHomeDir,
       configPath: join(codexHomeDir, 'config.toml'),
@@ -571,8 +571,8 @@ async function checkConfig(configPath: string): Promise<Check> {
     if (tomlError) {
       const hint =
         tomlError.includes("Can't redefine existing key") ||
-        tomlError.includes('duplicate') ||
-        tomlError.includes('[tui]')
+          tomlError.includes('duplicate') ||
+          tomlError.includes('[tui]')
           ? 'possible duplicate TOML table such as [tui]'
           : 'invalid TOML syntax';
 

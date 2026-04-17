@@ -10,9 +10,16 @@ import { dirname, isAbsolute, join, resolve } from "path";
 import { homedir } from "os";
 import { fileURLToPath } from "url";
 
-/** Codex CLI home directory (~/.codex/) */
+/** Copilot CLI home directory (~/.copilot/) with legacy ~/.codex fallback */
 export function codexHome(): string {
-  return process.env.CODEX_HOME || join(homedir(), ".codex");
+  const explicitHome = process.env.CODEX_HOME || process.env.COPILOT_HOME;
+  if (explicitHome) return explicitHome;
+
+  const copilotHome = join(homedir(), ".copilot");
+  const legacyCodexHome = join(homedir(), ".codex");
+  if (existsSync(copilotHome)) return copilotHome;
+  if (existsSync(legacyCodexHome)) return legacyCodexHome;
+  return copilotHome;
 }
 
 export const OMX_ENTRY_PATH_ENV = "OMX_ENTRY_PATH";
@@ -86,9 +93,19 @@ export function codexAgentsDir(codexHomeDir?: string): string {
   return join(codexHomeDir || codexHome(), "agents");
 }
 
-/** Project-level Codex native agents directory (.codex/agents/) */
+/** Project-level Copilot native agents directory (./.copilot/agents/) */
+export function projectCodexHomeDir(projectRoot?: string): string {
+  const root = projectRoot || process.cwd();
+  const copilotHome = join(root, ".copilot");
+  const legacyCodexHome = join(root, ".codex");
+  if (existsSync(copilotHome)) return copilotHome;
+  if (existsSync(legacyCodexHome)) return legacyCodexHome;
+  return copilotHome;
+}
+
+/** Project-level Copilot native agents directory (./.copilot/agents/) */
 export function projectCodexAgentsDir(projectRoot?: string): string {
-  return join(projectRoot || process.cwd(), ".codex", "agents");
+  return join(projectCodexHomeDir(projectRoot), "agents");
 }
 
 /** User-level skills directory ($CODEX_HOME/skills, defaults to ~/.codex/skills/) */
@@ -96,9 +113,9 @@ export function userSkillsDir(): string {
   return join(codexHome(), "skills");
 }
 
-/** Project-level skills directory (.codex/skills/) */
+/** Project-level skills directory (./.copilot/skills/) */
 export function projectSkillsDir(projectRoot?: string): string {
-  return join(projectRoot || process.cwd(), ".codex", "skills");
+  return join(projectCodexHomeDir(projectRoot), "skills");
 }
 
 /** Historical legacy user-level skills directory (~/.agents/skills/) */

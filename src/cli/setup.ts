@@ -127,14 +127,14 @@ export interface SkillFrontmatterMetadata {
 
 const PROJECT_GITIGNORE_ENTRIES = [
   ".omx/",
-  ".codex/*",
-  "!.codex/agents/",
-  "!.codex/agents/**",
-  "!.codex/skills/",
-  "!.codex/skills/**",
-  ".codex/skills/.system/**",
-  "!.codex/prompts/",
-  "!.codex/prompts/**",
+  ".copilot/*",
+  "!.copilot/agents/",
+  "!.copilot/agents/**",
+  "!.copilot/skills/",
+  "!.copilot/skills/**",
+  ".copilot/skills/.system/**",
+  "!.copilot/prompts/",
+  "!.copilot/prompts/**",
 ] as const;
 const LEGACY_PROJECT_GITIGNORE_ENTRIES = [".codex/"] as const;
 
@@ -143,7 +143,9 @@ function applyScopePathRewritesToAgentsTemplate(
   scope: SetupScope,
 ): string {
   if (scope !== "project") return content;
-  return content.replaceAll("~/.codex", "./.codex");
+  return content
+    .replaceAll("~/.codex", "./.copilot")
+    .replaceAll("./.codex", "./.copilot");
 }
 
 interface PersistedSetupScope {
@@ -367,7 +369,7 @@ async function buildLegacySkillOverlapNotice(
 function logCategorySummary(name: string, summary: SetupCategorySummary): void {
   console.log(
     `  ${name}: updated=${summary.updated}, unchanged=${summary.unchanged}, ` +
-      `backed_up=${summary.backedUp}, skipped=${summary.skipped}, removed=${summary.removed}`,
+    `backed_up=${summary.backedUp}, skipped=${summary.skipped}, removed=${summary.removed}`,
   );
 }
 
@@ -383,7 +385,7 @@ export function resolveScopeDirectories(
   projectRoot: string,
 ): ScopeDirectories {
   if (scope === "project") {
-    const codexHomeDir = join(projectRoot, ".codex");
+    const codexHomeDir = join(projectRoot, ".copilot");
     return {
       codexConfigFile: join(codexHomeDir, "config.toml"),
       codexHomeDir,
@@ -422,7 +424,7 @@ async function readPersistedSetupPreferences(
       if (migrated) {
         console.warn(
           `[omxc] Migrating persisted setup scope "${parsed.scope}" → "${migrated}" ` +
-            `(see issue #243: simplified to user/project).`,
+          `(see issue #243: simplified to user/project).`,
         );
         persisted.scope = migrated;
       }
@@ -447,9 +449,9 @@ async function promptForSetupScope(
   try {
     console.log("Select setup scope:");
     console.log(
-      `  1) user (default) — installs to ~/.codex (skills default to ~/.codex/skills)`,
+      `  1) user (default) — installs to ~/.copilot (skills default to ~/.copilot/skills)`,
     );
-    console.log("  2) project — installs to ./.codex (local to project)");
+    console.log("  2) project — installs to ./.copilot (local to project)");
     const answer = (await rl.question("Scope [1-2] (default: 1): "))
       .trim()
       .toLowerCase();
@@ -665,7 +667,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     resolvedScope.source === "persisted" ? " (from .omx/setup-scope.json)" : "";
   const backupContext = getBackupContext(resolvedScope.scope, projectRoot);
 
-  console.log("oh-my-codex setup");
+  console.log("omx-copilot setup");
   console.log("=================\n");
   console.log(
     `Using setup scope: ${resolvedScope.scope}${scopeSourceMessage}\n`,
@@ -702,11 +704,11 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     );
     if (gitignoreResult === "created") {
       console.log(
-        "  Created .gitignore with OMX project ignore rules so local runtime state stays out of source control while .codex agents, skills, and prompts remain trackable.\n",
+        "  Created .gitignore with OMX project ignore rules so local runtime state stays out of source control while .copilot agents, skills, and prompts remain trackable.\n",
       );
     } else if (gitignoreResult === "updated") {
       console.log(
-        "  Updated .gitignore with OMX project ignore rules so local runtime state stays out of source control while .codex agents, skills, and prompts remain trackable.\n",
+        "  Updated .gitignore with OMX project ignore rules so local runtime state stays out of source control while .copilot agents, skills, and prompts remain trackable.\n",
       );
     }
   }
@@ -850,7 +852,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     `native hooks ${scopeDirs.codexHooksFile}`,
   );
   console.log(
-    `  Native Codex hooks refresh complete (${scopeDirs.codexHooksFile}).\n`,
+    `  Native Copilot hooks refresh complete (${scopeDirs.codexHooksFile}).\n`,
   );
 
   // Step 5.5: Verify team CLI interop surface is available.
@@ -915,8 +917,8 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
       summary.agentsMd.skipped += 1;
       console.log(
         "  WARNING: Active omxc session detected (pid " +
-          activeSession?.pid +
-          ").",
+        activeSession?.pid +
+        ").",
       );
       console.log(
         "  Skipping AGENTS.md overwrite to avoid corrupting runtime overlay.",
@@ -1025,14 +1027,14 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
 
   console.log('Setup complete! Run "omxc doctor" to verify installation.');
   console.log("\nNext steps:");
-  console.log("  1. Start Codex CLI in your project directory");
+  console.log("  1. Start Copilot CLI in your project directory");
   console.log(
-    "  2. Use role/workflow keywords like $architect, $executor, and $plan in Codex",
+    "  2. Use role/workflow keywords like $architect, $executor, and $plan in Copilot CLI",
   );
   console.log("  3. Browse skills with /skills; AGENTS keyword routing can also activate them implicitly");
   console.log("  4. The AGENTS.md orchestration brain is loaded automatically");
   console.log(
-    "  5. Native agent defaults configured in config.toml [agents] and TOML files written to .codex/agents/",
+    "  5. Native agent defaults configured in config.toml [agents] and TOML files written to .copilot/agents/",
   );
   console.log(
     '  6. "omxc explore" and "omxc sparkshell" can hydrate native release binaries on first use; source installs still allow repo-local fallbacks and OMX_EXPLORE_BIN / OMX_SPARKSHELL_BIN overrides',
@@ -1087,9 +1089,10 @@ async function cleanupLegacySkillPromptShims(
 }
 
 function isGitHubCliConfigured(): boolean {
-  const result = spawnSync("gh", ["auth", "status"], { stdio: "ignore",
-      windowsHide: true,
-    });
+  const result = spawnSync("gh", ["auth", "status"], {
+    stdio: "ignore",
+    windowsHide: true,
+  });
   return result.status === 0;
 }
 
