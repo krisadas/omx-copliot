@@ -61,14 +61,14 @@
     "orchestration",
     "multi-agent"
   ],
-  "author": "Yeachan Heo",
+  "author": "Krisada",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yeachan-Heo/omx-copilot.git"
+    "url": "git+https://github.com/krisadas/omx-copliot.git"
   },
-  "homepage": "https://yeachan-heo.github.io/omx-copilot",
+  "homepage": "https://github.com/krisadas/omx-copliot#readme",
   "bugs": {
-    "url": "https://github.com/Yeachan-Heo/omx-copilot/issues"
+    "url": "https://github.com/krisadas/omx-copliot/issues"
   },
   "license": "MIT",
   "dependencies": {
