@@ -1,4 +1,4 @@
-# omx-copliot
+# omx-copilot
 
 OMX-CoPilot is a workflow layer for GitHub Copilot CLI.
 
@@ -29,11 +29,19 @@ These listings are preserved as historical reference only.
 
 ## New Usage Guide
 
+### 0) Install From npm (Recommended)
+
+```bash
+npm install -g omxc-workflow
+omxc setup
+omxc doctor
+```
+
 ### 1) Clone And Install Dependencies (Source Only)
 
 ```bash
-git clone https://github.com/krisadas/omx-copliot
-cd omx-copliot
+git clone https://github.com/krisadas/omx-copilot
+cd omx-copilot
 npm install
 npm audit fix
 npm run build

@@ -1,6 +1,6 @@
 {
-  "name": "omx-copilot",
-  "version": "0.1.0",
+  "name": "omxc-workflow",
+  "version": "0.1.1",
   "description": "Multi-agent orchestration layer for CoPilot CLI",
   "type": "module",
   "main": "dist/index.js",

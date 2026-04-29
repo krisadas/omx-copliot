@@ -20,7 +20,7 @@ interface LatestPackageInfo {
   version?: string;
 }
 
-const PACKAGE_NAME = 'omx-copilot';
+const PACKAGE_NAME = 'omxc-workflow';
 const CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12h
 
 function parseSemver(version: string): [number, number, number] | null {
@@ -177,6 +177,6 @@ export async function maybeCheckAndPromptUpdate(
     await updateDependencies.setup({ force: true });
     console.log(`[omxc] Updated to v${latest}. Restart to use new code.`);
   } else {
-    console.log('[omxc] Update failed. Run manually: npm install -g omx-copilot@latest');
+    console.log('[omxc] Update failed. Run manually: npm install -g omxc-workflow@latest');
   }
 }
