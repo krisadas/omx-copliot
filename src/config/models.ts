@@ -22,7 +22,7 @@
 import { parse as parseToml } from '@iarna/toml';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { codexConfigPath, codexHome } from '../utils/paths.js';
+import { copilotConfigPath, copilotHome } from '../utils/paths.js';
 
 export interface ModelsConfig {
   [mode: string]: string | undefined;
@@ -37,7 +37,7 @@ interface OmxConfigFile {
   models?: ModelsConfig;
 }
 
-interface CodexConfigFile {
+interface CopilotConfigFile {
   model_provider?: unknown;
   model_providers?: Record<string, unknown>;
 }
@@ -48,7 +48,7 @@ export const OMX_DEFAULT_SPARK_MODEL_ENV = 'OMX_DEFAULT_SPARK_MODEL';
 export const OMX_SPARK_MODEL_ENV = 'OMX_SPARK_MODEL';
 
 function readOmxConfigFile(codexHomeOverride?: string): OmxConfigFile | null {
-  const configPath = join(codexHomeOverride || codexHome(), '.omx-config.json');
+  const configPath = join(codexHomeOverride || copilotHome(), '.omx-config.json');
   if (!existsSync(configPath)) return null;
   try {
     const raw = JSON.parse(readFileSync(configPath, 'utf-8'));
@@ -59,15 +59,15 @@ function readOmxConfigFile(codexHomeOverride?: string): OmxConfigFile | null {
   }
 }
 
-function readCodexConfigFile(codexHomeOverride?: string): CodexConfigFile | null {
+function readCopilotConfigFile(codexHomeOverride?: string): CopilotConfigFile | null {
   const configPath = codexHomeOverride
     ? join(codexHomeOverride, 'config.toml')
-    : codexConfigPath();
+    : copilotConfigPath();
   if (!existsSync(configPath)) return null;
   try {
     const raw = parseToml(readFileSync(configPath, 'utf-8'));
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
-    return raw as CodexConfigFile;
+    return raw as CopilotConfigFile;
   } catch {
     return null;
   }
@@ -84,7 +84,7 @@ function readModelsBlock(codexHomeOverride?: string): ModelsConfig | null {
 
 export const DEFAULT_FRONTIER_MODEL = 'gpt-5.4';
 export const DEFAULT_STANDARD_MODEL = 'gpt-5.4-mini';
-export const DEFAULT_SPARK_MODEL = 'gpt-5.3-codex-spark';
+export const DEFAULT_SPARK_MODEL = 'gpt-4.1-mini';
 
 function normalizeConfiguredValue(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
@@ -128,7 +128,7 @@ export function readActiveProviderEnvOverrides(
   env: NodeJS.ProcessEnv = process.env,
   codexHomeOverride?: string,
 ): NodeJS.ProcessEnv {
-  const config = readCodexConfigFile(codexHomeOverride);
+  const config = readCopilotConfigFile(codexHomeOverride);
   if (!config) return {};
 
   const activeProvider = normalizeConfiguredValue(config.model_provider);

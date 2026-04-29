@@ -34,7 +34,7 @@ Unified and only entry point for notification setup.
 ## Step 1: Inspect Current State
 
 ```bash
-CONFIG_FILE="$HOME/.codex/.omx-config.json"
+CONFIG_FILE="$HOME/.copilot/.omx-config.json"
 
 if [ -f "$CONFIG_FILE" ]; then
   jq -r '
@@ -283,4 +283,4 @@ Show:
 - Generic aliases enabled (`custom_webhook_command`, `custom_cli_command`)
 - Whether explicit `notifications.openclaw` exists (and therefore overrides aliases)
 - Verbosity + idle cooldown + reply listener state
-- Config path (`~/.codex/.omx-config.json`)
+- Config path (`~/.copilot/.omx-config.json`)

@@ -1,6 +1,6 @@
 ---
 name: help
-description: Guide on using oh-my-codex plugin
+description: Guide on using omx-copilot plugin
 ---
 
 # How OMX Works
@@ -67,7 +67,7 @@ But now you don't NEED them - everything is automatic.
 
 ## Usage Analysis
 
-Analyze your oh-my-codex usage and get tailored recommendations to improve your workflow.
+Analyze your omx-copilot usage and get tailored recommendations to improve your workflow.
 
 > Note: This replaces the former `/learn-about-omc` skill.
 
@@ -85,7 +85,7 @@ Analyze your oh-my-codex usage and get tailored recommendations to improve your 
 # Check for token tracking data
 TOKEN_FILE="$HOME/.omx/state/token-tracking.jsonl"
 SESSION_FILE=".omx/state/session-history.json"
-CONFIG_FILE="$HOME/.codex/.omx-config.json"
+CONFIG_FILE="$HOME/.copilot/.omx-config.json"
 
 echo "Analyzing OMX Usage..."
 echo ""
@@ -192,8 +192,8 @@ Tip: Run /omx-setup to configure OMX properly.
 
 ## Need More Help?
 
-- **README**: https://github.com/Yeachan-Heo/oh-my-codex
-- **Issues**: https://github.com/Yeachan-Heo/oh-my-codex/issues
+- **README**: https://github.com/Yeachan-Heo/omx-copilot
+- **Issues**: https://github.com/Yeachan-Heo/omx-copilot/issues
 
 ---
 

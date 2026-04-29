@@ -1,6 +1,6 @@
 import { join } from "path";
 
-export interface ManagedCodexHooksConfig {
+export interface ManagedCopilotHooksConfig {
   hooks: {
     SessionStart: Array<Record<string, unknown>>;
     PreToolUse: Array<Record<string, unknown>>;
@@ -30,8 +30,8 @@ function buildCommandHook(
   };
 }
 
-export function buildManagedCodexHooksConfig(pkgRoot: string): ManagedCodexHooksConfig {
-  const hookScript = join(pkgRoot, "dist", "scripts", "codex-native-hook.js");
+export function buildManagedCopilotHooksConfig(pkgRoot: string): ManagedCopilotHooksConfig {
+  const hookScript = join(pkgRoot, "dist", "scripts", "copilot-native-hook.js");
   const command = `node "${hookScript}"`;
 
   return {

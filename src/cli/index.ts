@@ -30,6 +30,7 @@ import { agentsCommand } from "./agents.js";
 import { sessionCommand } from "./session-search.js";
 import { autoresearchCommand } from "./autoresearch.js";
 import {
+  COPILOT_BIN,
   MADMAX_FLAG,
   CODEX_BYPASS_FLAG,
   HIGH_REASONING_FLAG,
@@ -75,12 +76,7 @@ import {
   isTmuxAvailable,
 } from "../team/tmux-session.js";
 import { getPackageRoot } from "../utils/package.js";
-import {
-  codexConfigPath,
-  projectCodexHomeDir,
-  rememberOmxLaunchContext,
-  resolveOmxEntryPath,
-} from "../utils/paths.js";
+import { codexConfigPath, rememberOmxLaunchContext, resolveOmxEntryPath } from "../utils/paths.js";
 import { repairConfigIfNeeded } from "../config/generator.js";
 import { HUD_TMUX_HEIGHT_LINES } from "../hud/constants.js";
 
@@ -164,11 +160,11 @@ Usage:
 Options:
   --yolo        Launch Copilot CLI in yolo mode (shorthand for: omxc launch --yolo)
   --high        Launch Copilot CLI with high reasoning effort
-                (shorthand for: -c model_reasoning_effort="high")
+                (shorthand for: --effort high)
   --xhigh       Launch Copilot CLI with xhigh reasoning effort
-                (shorthand for: -c model_reasoning_effort="xhigh")
-  --madmax      DANGEROUS: bypass Codex approvals and sandbox
-                (alias for --dangerously-bypass-approvals-and-sandbox)
+                (shorthand for: --effort xhigh)
+  --madmax      DANGEROUS: bypass all Copilot approvals and restrictions
+                (alias for --allow-all)
   --spark       Use the Codex spark model (~1.3x faster) for team workers only
                 Workers get the configured low-complexity team model; leader model unchanged
   --madmax-spark  spark model for workers + bypass approvals for leader and workers
@@ -322,10 +318,11 @@ export function resolveCodexHomeForLaunch(
   cwd: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
+  if (env.COPILOT_HOME && env.COPILOT_HOME.trim() !== "") return env.COPILOT_HOME;
   if (env.CODEX_HOME && env.CODEX_HOME.trim() !== "") return env.CODEX_HOME;
   const persistedScope = readPersistedSetupScope(cwd);
   if (persistedScope === "project") {
-    return projectCodexHomeDir(cwd);
+    return join(cwd, ".copilot");
   }
   return undefined;
 }
@@ -525,7 +522,7 @@ function runCodexBlocking(
   launchArgs: string[],
   codexEnv: NodeJS.ProcessEnv,
 ): void {
-  const { result } = spawnPlatformCommandSync("copilot-cli", launchArgs, {
+  const { result } = spawnPlatformCommandSync(COPILOT_BIN, launchArgs, {
     cwd,
     stdio: "inherit",
     env: codexEnv,
@@ -675,7 +672,7 @@ export async function main(args: string[]): Promise<void> {
         await launchWithHud(launchArgs);
         break;
       case "resume":
-        await launchWithHud(["resume", ...launchArgs]);
+        await launchWithHud(["--resume", ...launchArgs]);
         break;
       case "setup":
         await setup({
@@ -1054,7 +1051,7 @@ export async function execWithOverlay(args: string[]): Promise<void> {
       sessionModelInstructionsPath(cwd, sessionId),
     );
     const codexEnvBase = codexHomeOverride
-      ? { ...process.env, CODEX_HOME: codexHomeOverride }
+      ? { ...process.env, COPILOT_HOME: codexHomeOverride }
       : process.env;
     const codexEnv = notifyTempContractRaw
       ? {
@@ -1120,7 +1117,7 @@ export function normalizeCodexLaunchArgs(args: string[]): string[] {
   }
 
   if (reasoningMode) {
-    normalized.push(CONFIG_FLAG, `${REASONING_KEY}="${reasoningMode}"`);
+    normalized.push('--effort', reasoningMode);
   }
 
   return normalized;
@@ -1252,18 +1249,14 @@ function buildNativeHookBaseContext(
 }
 
 export function injectModelInstructionsBypassArgs(
-  cwd: string,
+  _cwd: string,
   args: string[],
-  env: NodeJS.ProcessEnv = process.env,
-  defaultFilePath?: string,
+  _env: NodeJS.ProcessEnv = process.env,
+  _defaultFilePath?: string,
 ): string[] {
-  if (!shouldBypassDefaultSystemPrompt(env)) return [...args];
-  if (hasModelInstructionsOverride(args)) return [...args];
-  return [
-    ...args,
-    CONFIG_FLAG,
-    buildModelInstructionsOverride(cwd, env, defaultFilePath),
-  ];
+  // GitHub Copilot CLI automatically reads AGENTS.md in the working directory.
+  // No explicit model_instructions_file injection needed.
+  return [...args];
 }
 
 export function collectInheritableTeamWorkerArgs(
@@ -1724,7 +1717,7 @@ export function buildDetachedSessionBootstrapSteps(
       ? ["-e", `${TEAM_WORKER_LAUNCH_ARGS_ENV}=${workerLaunchArgs}`]
       : []),
     ...(sessionId ? ["-e", `OMX_SESSION_ID=${sessionId}`] : []),
-    ...(codexHomeOverride ? ["-e", `CODEX_HOME=${codexHomeOverride}`] : []),
+    ...(codexHomeOverride ? ["-e", `COPILOT_HOME=${codexHomeOverride}`] : []),
     ...(notifyTempContractRaw
       ? ["-e", `${OMX_NOTIFY_TEMP_CONTRACT_ENV}=${notifyTempContractRaw}`]
       : []),
@@ -1896,7 +1889,7 @@ export function buildNotifyFallbackWatcherEnv(
   delete nextEnv.TMUX_PANE;
   return {
     ...nextEnv,
-    ...(options.codexHomeOverride ? { CODEX_HOME: options.codexHomeOverride } : {}),
+    ...(options.codexHomeOverride ? { COPILOT_HOME: options.codexHomeOverride } : {}),
     ...(options.sessionId ? { OMX_SESSION_ID: options.sessionId } : {}),
     OMX_HUD_AUTHORITY: options.enableAuthority ? "1" : "0",
   };
@@ -2265,7 +2258,7 @@ function runCodex(
     workerDefaultModel,
   );
   const codexBaseEnv = codexHomeOverride
-    ? { ...process.env, CODEX_HOME: codexHomeOverride }
+    ? { ...process.env, COPILOT_HOME: codexHomeOverride }
     : process.env;
   const codexEnvWithSession = { ...codexBaseEnv, OMX_SESSION_ID: sessionId };
   const codexEnv = workerLaunchArgs
@@ -2354,9 +2347,9 @@ function runCodex(
     runCodexBlocking(cwd, launchArgs, codexEnvWithNotify);
   } else {
     // Not in tmux: create a new tmux session with codex + HUD pane
-    const codexCmd = buildTmuxPaneCommand("copilot-cli", launchArgs);
+    const codexCmd = buildTmuxPaneCommand(COPILOT_BIN, launchArgs);
     const detachedWindowsCodexCmd = nativeWindows
-      ? buildWindowsPromptCommand("copilot-cli", launchArgs)
+      ? buildWindowsPromptCommand(COPILOT_BIN, launchArgs)
       : null;
     const sessionName = buildDetachedTmuxSessionName(cwd, sessionId);
     let createdDetachedSession = false;

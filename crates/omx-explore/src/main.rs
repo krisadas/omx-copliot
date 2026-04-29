@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-const CODEX_BIN_ENV: &str = "OMX_EXPLORE_CODEX_BIN";
+const CODEX_BIN_ENV: &str = "OMX_EXPLORE_COPILOT_BIN";
 const HARNESS_ROOT_ENV: &str = "OMX_EXPLORE_ROOT";
 const INTERNAL_DIRECT_WRAPPER_FLAG: &str = "--internal-allowlist-direct";
 const INTERNAL_SHELL_WRAPPER_FLAG: &str = "--internal-allowlist-shell";
@@ -98,7 +98,7 @@ where
         )
     })?;
 
-    let spark_attempt = invoke_codex(&args, &args.spark_model, &prompt_contract)
+    let spark_attempt = invoke_copilot(&args, &args.spark_model, &prompt_contract)
         .map_err(|err| format!("spark attempt failed to launch: {err}"))?;
     if spark_attempt.status_code == 0 {
         print_attempt_output(spark_attempt)?;
@@ -116,7 +116,7 @@ where
         );
     }
 
-    let fallback_attempt = invoke_codex(&args, &args.fallback_model, &prompt_contract)
+    let fallback_attempt = invoke_copilot(&args, &args.fallback_model, &prompt_contract)
         .map_err(|err| format!("fallback attempt failed to launch: {err}"))?;
     if fallback_attempt.status_code == 0 {
         print_attempt_output(fallback_attempt)?;
@@ -197,13 +197,13 @@ fn usage() -> &'static str {
     "Usage: omx-explore --cwd <dir> --prompt <text> --prompt-file <explore-prompt.md> --model-spark <model> --model-fallback <model>"
 }
 
-fn invoke_codex(args: &Args, model: &str, prompt_contract: &str) -> io::Result<AttemptResult> {
-    let codex_launch = resolve_codex_launch();
+fn invoke_copilot(args: &Args, model: &str, prompt_contract: &str) -> io::Result<AttemptResult> {
+    let copilot_launch = resolve_copilot_launch();
     let allowlist = prepare_allowlist_environment().map_err(io::Error::other)?;
     let output_path = temp_output_path();
     let final_prompt = compose_exec_prompt(&args.prompt, prompt_contract);
-    let mut command = Command::new(&codex_launch.program);
-    command.args(&codex_launch.leading_args);
+    let mut command = Command::new(&copilot_launch.program);
+    command.args(&copilot_launch.leading_args);
     command
         .arg("exec")
         .arg("-C")
@@ -236,20 +236,20 @@ fn invoke_codex(args: &Args, model: &str, prompt_contract: &str) -> io::Result<A
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct CodexLaunch {
+struct CopilotLaunch {
     program: String,
     leading_args: Vec<String>,
 }
 
-fn resolve_codex_launch() -> CodexLaunch {
-    let codex_binary = resolve_codex_binary();
-    codex_launch_for_binary(&codex_binary).unwrap_or_else(|| CodexLaunch {
-        program: codex_binary,
+fn resolve_copilot_launch() -> CopilotLaunch {
+    let copilot_binary = resolve_copilot_binary();
+    copilot_launch_for_binary(&copilot_binary).unwrap_or_else(|| CopilotLaunch {
+        program: copilot_binary,
         leading_args: Vec::new(),
     })
 }
 
-fn resolve_codex_binary() -> String {
+fn resolve_copilot_binary() -> String {
     if let Some(value) = env::var(CODEX_BIN_ENV)
         .ok()
         .map(|value| value.trim().to_string())
@@ -264,16 +264,17 @@ fn resolve_codex_binary() -> String {
         return value;
     }
 
-    resolve_host_command("copilot-cli")
+    let default_bin = std::env::var("COPILOT_CLI_BIN").unwrap_or_else(|_| "copilot".to_string());
+    resolve_host_command(&default_bin)
         .map(|path| path.display().to_string())
-        .unwrap_or_else(|| "copilot-cli".to_string())
+        .unwrap_or(default_bin)
 }
 
-fn codex_launch_for_binary(codex_binary: &str) -> Option<CodexLaunch> {
-    let interpreter = read_shebang_interpreter(Path::new(codex_binary))?;
+fn copilot_launch_for_binary(copilot_binary: &str) -> Option<CopilotLaunch> {
+    let interpreter = read_shebang_interpreter(Path::new(copilot_binary))?;
     let (program, mut leading_args) = resolve_shebang_launch(&interpreter)?;
-    leading_args.push(codex_binary.to_string());
-    Some(CodexLaunch {
+    leading_args.push(copilot_binary.to_string());
+    Some(CopilotLaunch {
         program,
         leading_args,
     })
@@ -843,19 +844,19 @@ mod tests {
     }
 
     #[test]
-    fn resolve_codex_binary_prefers_env_override() {
+    fn resolve_copilot_binary_prefers_env_override() {
         let _guard = env_lock();
         unsafe {
             env::set_var(CODEX_BIN_ENV, "/tmp/codex-stub");
         }
-        assert_eq!(resolve_codex_binary(), "/tmp/codex-stub");
+        assert_eq!(resolve_copilot_binary(), "/tmp/codex-stub");
         unsafe {
             env::remove_var(CODEX_BIN_ENV);
         }
     }
 
     #[test]
-    fn resolve_codex_binary_resolves_bare_env_override_from_path() {
+    fn resolve_copilot_binary_resolves_bare_env_override_from_path() {
         let _guard = env_lock();
         let root = temp_allowlist_dir().expect("temp root");
         let bin_dir = root.path.join("bin");
@@ -870,7 +871,7 @@ mod tests {
             env::set_var("PATH", &bin_dir);
         }
 
-        let resolved = resolve_codex_binary();
+        let resolved = resolve_copilot_binary();
 
         unsafe {
             env::remove_var(CODEX_BIN_ENV);
@@ -889,7 +890,7 @@ mod tests {
         let script_path = root.path.join("codex-script");
         write(&script_path, b"#!/usr/bin/env node\nconsole.log(\"ok\");\n").expect("write script");
 
-        let launch = codex_launch_for_binary(script_path.to_str().expect("script path"))
+        let launch = copilot_launch_for_binary(script_path.to_str().expect("script path"))
             .expect("launch config");
         let expected_node = resolve_host_command("node").expect("host node path");
         assert_eq!(launch.program, expected_node.display().to_string());

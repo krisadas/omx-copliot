@@ -4,7 +4,7 @@
  * Prevents flooding users with session-idle notifications by enforcing a
  * minimum interval between dispatches. Ported from OMC persistent-mode hook.
  *
- * Config key : notifications.idleCooldownSeconds in ~/.codex/.omx-config.json
+ * Config key : notifications.idleCooldownSeconds in ~/.copilot/.omx-config.json
  * Env var    : OMX_IDLE_COOLDOWN_SECONDS  (overrides config)
  * State file : .omx/state/idle-notif-cooldown.json
  *              (session-scoped when sessionId is available)
@@ -32,7 +32,7 @@ interface IdleNotificationState {
  *
  * Resolution order:
  *   1. OMX_IDLE_COOLDOWN_SECONDS env var
- *   2. notifications.idleCooldownSeconds in ~/.codex/.omx-config.json
+ *   2. notifications.idleCooldownSeconds in ~/.copilot/.omx-config.json
  *   3. Default: 60 seconds
  */
 export function getIdleNotificationCooldownSeconds(): number {

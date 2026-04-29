@@ -1,5 +1,5 @@
 /**
- * omxc doctor - Validate oh-my-codex installation
+ * omxc doctor - Validate omx-copilot installation
  */
 
 import { existsSync } from 'fs';
@@ -7,9 +7,10 @@ import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import {
   codexHome, codexConfigPath, codexPromptsDir,
-  userSkillsDir, projectSkillsDir, omxStateDir, detectLegacySkillRootOverlap, projectCodexHomeDir,
+  userSkillsDir, projectSkillsDir, omxStateDir, detectLegacySkillRootOverlap,
 } from '../utils/paths.js';
 import { classifySpawnError, spawnPlatformCommandSync } from '../utils/platform-command.js';
+import { COPILOT_BIN } from './constants.js';
 import { getCatalogExpectations } from './catalog-contract.js';
 import { parse as parseToml } from '@iarna/toml';
 import { resolvePackagedExploreHarnessCommand, EXPLORE_BIN_ENV } from './explore.js';
@@ -77,7 +78,7 @@ async function resolveDoctorScope(cwd: string): Promise<DoctorScopeResolution> {
 
 function resolveDoctorPaths(cwd: string, scope: DoctorSetupScope): DoctorPaths {
   if (scope === 'project') {
-    const codexHomeDir = projectCodexHomeDir(cwd);
+    const codexHomeDir = join(cwd, '.copilot');
     return {
       codexHomeDir,
       configPath: join(codexHomeDir, 'config.toml'),
@@ -109,7 +110,7 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
     ? ' (from .omx/setup-scope.json)'
     : '';
 
-  console.log('oh-my-codex doctor');
+  console.log('omx-copilot doctor');
   console.log('==================\n');
   console.log(`Resolved setup scope: ${scopeResolution.scope}${scopeSourceMessage}\n`);
 
@@ -173,7 +174,7 @@ export async function doctor(options: DoctorOptions = {}): Promise<void> {
   } else if (warnCount > 0) {
     console.log('\nRun "omxc setup --force" to refresh all components.');
   } else {
-    console.log('\nAll checks passed! oh-my-codex is ready.');
+    console.log('\nAll checks passed! omx-copilot is ready.');
   }
 }
 
@@ -184,7 +185,7 @@ interface TeamDoctorIssue {
 }
 
 async function doctorTeam(): Promise<void> {
-  console.log('oh-my-codex doctor --team');
+  console.log('omx-copilot doctor --team');
   console.log('=========================\n');
 
   const issues = await collectTeamDoctorIssues(process.cwd());
@@ -421,7 +422,7 @@ function listTeamTmuxSessions(): Set<string> | null {
 }
 
 function checkCodexCli(): Check {
-  const { result } = spawnPlatformCommandSync('copilot-cli', ['--version'], {
+  const { result } = spawnPlatformCommandSync(COPILOT_BIN, ['--version'], {
     encoding: 'utf-8',
     stdio: ['pipe', 'pipe', 'pipe'],
   });
@@ -429,28 +430,28 @@ function checkCodexCli(): Check {
     const code = (result.error as NodeJS.ErrnoException).code;
     const kind = classifySpawnError(result.error as NodeJS.ErrnoException);
     if (kind === 'missing') {
-      return { name: 'Codex CLI', status: 'fail', message: 'not found - install from https://github.com/openai/codex' };
+      return { name: 'Copilot CLI', status: 'fail', message: 'not found - install from https://github.com/cli/cli' };
     }
     if (kind === 'blocked') {
       return {
-        name: 'Codex CLI',
+        name: 'Copilot CLI',
         status: 'fail',
         message: `found but could not be executed in this environment (${code || 'blocked'})`,
       };
     }
     return {
-      name: 'Codex CLI',
+      name: 'Copilot CLI',
       status: 'fail',
       message: `probe failed - ${result.error.message}`,
     };
   }
   if (result.status === 0) {
     const version = (result.stdout || '').trim();
-    return { name: 'Codex CLI', status: 'pass', message: `installed (${version})` };
+    return { name: 'Copilot CLI', status: 'pass', message: `installed (${version})` };
   }
   const stderr = (result.stderr || '').trim();
   return {
-    name: 'Codex CLI',
+    name: 'Copilot CLI',
     status: 'fail',
     message: stderr !== '' ? `probe failed - ${stderr}` : `probe failed with exit ${result.status}`,
   };
@@ -571,8 +572,8 @@ async function checkConfig(configPath: string): Promise<Check> {
     if (tomlError) {
       const hint =
         tomlError.includes("Can't redefine existing key") ||
-          tomlError.includes('duplicate') ||
-          tomlError.includes('[tui]')
+        tomlError.includes('duplicate') ||
+        tomlError.includes('[tui]')
           ? 'possible duplicate TOML table such as [tui]'
           : 'invalid TOML syntax';
 
@@ -583,7 +584,7 @@ async function checkConfig(configPath: string): Promise<Check> {
       };
     }
 
-    const hasOmx = content.includes('omx_') || content.includes('oh-my-codex');
+    const hasOmx = content.includes('omx_') || content.includes('omx-copilot');
     if (hasOmx) {
       return { name: 'Config', status: 'pass', message: 'config.toml has OMX entries' };
     }

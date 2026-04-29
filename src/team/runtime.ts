@@ -1887,7 +1887,7 @@ export async function startTeam(
       const workerRole = taskRoles.length > 0 && uniqueTaskRoles.size === 1
         ? taskRoles[0]
         : agentType;
-      const rawRolePromptContent = await loadRolePrompt(workerRole, join(leaderCwd, '.codex', 'prompts'))
+      const rawRolePromptContent = await loadRolePrompt(workerRole, join(leaderCwd, '.copilot', 'prompts'))
         ?? await loadRolePrompt(workerRole, codexPromptsDir());
       const preferredReasoning = resolveAgentReasoningEffort(workerRole) ?? resolveAgentReasoningEffort(agentType);
       const workerLaunchArgs = resolveWorkerLaunchArgsFromEnv(

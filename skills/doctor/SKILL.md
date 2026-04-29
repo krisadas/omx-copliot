@@ -1,11 +1,11 @@
 ---
 name: doctor
-description: Diagnose and fix oh-my-codex installation issues
+description: Diagnose and fix omx-copilot installation issues
 ---
 
 # Doctor Skill
 
-Note: All `~/.codex/...` paths in this guide respect `CODEX_HOME` when that environment variable is set.
+Note: All `~/.copilot/...` paths in this guide respect `COPILOT_HOME` when that environment variable is set.
 
 ## Task: Run Installation Diagnostics
 
@@ -15,11 +15,11 @@ You are the OMX Doctor - diagnose and fix installation issues.
 
 ```bash
 # Get installed version
-INSTALLED=$(ls ~/.codex/plugins/cache/omc/oh-my-codex/ 2>/dev/null | sort -V | tail -1)
+INSTALLED=$(ls ~/.copilot/plugins/cache/omc/omx-copilot/ 2>/dev/null | sort -V | tail -1)
 echo "Installed: $INSTALLED"
 
 # Get latest from npm
-LATEST=$(npm view oh-my-codex version 2>/dev/null)
+LATEST=$(npm view omx-copilot version 2>/dev/null)
 echo "Latest: $LATEST"
 ```
 
@@ -30,12 +30,12 @@ echo "Latest: $LATEST"
 
 ### Step 2: Check Hook Configuration (config.toml + legacy settings.json)
 
-Check `~/.codex/config.toml` first (current Codex config), then check legacy `~/.codex/settings.json` only if it exists.
+Check `~/.copilot/config.toml` first (current Codex config), then check legacy `~/.copilot/settings.json` only if it exists.
 
 Look for hook entries pointing to removed scripts like:
-- `bash $HOME/.codex/hooks/keyword-detector.sh`
-- `bash $HOME/.codex/hooks/persistent-mode.sh`
-- `bash $HOME/.codex/hooks/session-start.sh`
+- `bash $HOME/.copilot/hooks/keyword-detector.sh`
+- `bash $HOME/.copilot/hooks/persistent-mode.sh`
+- `bash $HOME/.copilot/hooks/session-start.sh`
 
 **Diagnosis**:
 - If found: CRITICAL - legacy hooks causing duplicates
@@ -43,7 +43,7 @@ Look for hook entries pointing to removed scripts like:
 ### Step 3: Check for Legacy Bash Hook Scripts
 
 ```bash
-ls -la ~/.codex/hooks/*.sh 2>/dev/null
+ls -la ~/.copilot/hooks/*.sh 2>/dev/null
 ```
 
 **Diagnosis**:
@@ -53,10 +53,10 @@ ls -la ~/.codex/hooks/*.sh 2>/dev/null
 
 ```bash
 # Check if AGENTS.md exists
-ls -la ~/.codex/AGENTS.md 2>/dev/null
+ls -la ~/.copilot/AGENTS.md 2>/dev/null
 
 # Check for OMX marker
-grep -q "oh-my-codex Multi-Agent System" ~/.codex/AGENTS.md 2>/dev/null && echo "Has OMX config" || echo "Missing OMX config"
+grep -q "omx-copilot Multi-Agent System" ~/.copilot/AGENTS.md 2>/dev/null && echo "Has OMX config" || echo "Missing OMX config"
 ```
 
 **Diagnosis**:
@@ -67,7 +67,7 @@ grep -q "oh-my-codex Multi-Agent System" ~/.codex/AGENTS.md 2>/dev/null && echo 
 
 ```bash
 # Count versions in cache
-ls ~/.codex/plugins/cache/omc/oh-my-codex/ 2>/dev/null | wc -l
+ls ~/.copilot/plugins/cache/omc/omx-copilot/ 2>/dev/null | wc -l
 ```
 
 **Diagnosis**:
@@ -79,28 +79,28 @@ Check for legacy agents, commands, and historical legacy skill roots from older 
 
 ```bash
 # Check for legacy agents directory
-ls -la ~/.codex/agents/ 2>/dev/null
+ls -la ~/.copilot/agents/ 2>/dev/null
 
 # Check for legacy commands directory
-ls -la ~/.codex/commands/ 2>/dev/null
+ls -la ~/.copilot/commands/ 2>/dev/null
 
 # Check canonical current skills directory
-ls -la ${CODEX_HOME:-~/.codex}/skills/ 2>/dev/null
+ls -la ${COPILOT_HOME:-~/.copilot}/skills/ 2>/dev/null
 
 # Check historical legacy skill directory
 ls -la ~/.agents/skills/ 2>/dev/null
 ```
 
 **Diagnosis**:
-- If `~/.codex/agents/` exists with oh-my-codex-related files: WARN - legacy agents (now provided by plugin)
-- If `~/.codex/commands/` exists with oh-my-codex-related files: WARN - legacy commands (now provided by plugin)
-- If `${CODEX_HOME:-~/.codex}/skills/` exists with OMX skills: OK - canonical current user skill root
-- If `~/.agents/skills/` exists: WARN - historical legacy skill root that can overlap with `${CODEX_HOME:-~/.codex}/skills/` and cause duplicate Enable/Disable Skills entries
+- If `~/.copilot/agents/` exists with omx-copilot-related files: WARN - legacy agents (now provided by plugin)
+- If `~/.copilot/commands/` exists with omx-copilot-related files: WARN - legacy commands (now provided by plugin)
+- If `${COPILOT_HOME:-~/.copilot}/skills/` exists with OMX skills: OK - canonical current user skill root
+- If `~/.agents/skills/` exists: WARN - historical legacy skill root that can overlap with `${COPILOT_HOME:-~/.copilot}/skills/` and cause duplicate Enable/Disable Skills entries
 
 Look for files like:
 - `architect.md`, `researcher.md`, `explore.md`, `executor.md`, etc. in agents/
 - `ultrawork.md`, `deepsearch.md`, etc. in commands/
-- Any oh-my-codex-related `.md` files in skills/
+- Any omx-copilot-related `.md` files in skills/
 
 ---
 
@@ -120,12 +120,12 @@ After running all checks, output a report:
 |-------|--------|---------|
 | Plugin Version | OK/WARN/CRITICAL | ... |
 | Hook Config (config.toml / legacy settings.json) | OK/CRITICAL | ... |
-| Legacy Scripts (~/.codex/hooks/) | OK/WARN | ... |
+| Legacy Scripts (~/.copilot/hooks/) | OK/WARN | ... |
 | AGENTS.md | OK/WARN/CRITICAL | ... |
 | Plugin Cache | OK/WARN | ... |
-| Legacy Agents (~/.codex/agents/) | OK/WARN | ... |
-| Legacy Commands (~/.codex/commands/) | OK/WARN | ... |
-| Skills (${CODEX_HOME:-~/.codex}/skills) | OK/WARN | ... |
+| Legacy Agents (~/.copilot/agents/) | OK/WARN | ... |
+| Legacy Commands (~/.copilot/commands/) | OK/WARN | ... |
+| Skills (${COPILOT_HOME:-~/.copilot}/skills) | OK/WARN | ... |
 | Legacy Skill Root (~/.agents/skills) | OK/WARN | ... |
 
 ### Issues Found
@@ -145,52 +145,52 @@ If issues found, ask user: "Would you like me to fix these issues automatically?
 If yes, apply fixes:
 
 ### Fix: Legacy Hooks in legacy settings.json
-If `~/.codex/settings.json` exists, remove the legacy `"hooks"` section (keep other settings intact).
+If `~/.copilot/settings.json` exists, remove the legacy `"hooks"` section (keep other settings intact).
 
 ### Fix: Legacy Bash Scripts
 ```bash
-rm -f ~/.codex/hooks/keyword-detector.sh
-rm -f ~/.codex/hooks/persistent-mode.sh
-rm -f ~/.codex/hooks/session-start.sh
-rm -f ~/.codex/hooks/stop-continuation.sh
+rm -f ~/.copilot/hooks/keyword-detector.sh
+rm -f ~/.copilot/hooks/persistent-mode.sh
+rm -f ~/.copilot/hooks/session-start.sh
+rm -f ~/.copilot/hooks/stop-continuation.sh
 ```
 
 ### Fix: Outdated Plugin
 ```bash
-rm -rf ~/.codex/plugins/cache/omc/oh-my-codex
+rm -rf ~/.copilot/plugins/cache/omc/omx-copilot
 echo "Plugin cache cleared. Restart Codex CLI to fetch latest version."
 ```
 
 ### Fix: Stale Cache (multiple versions)
 ```bash
 # Keep only latest version
-cd ~/.codex/plugins/cache/omc/oh-my-codex/
+cd ~/.copilot/plugins/cache/omc/omx-copilot/
 ls | sort -V | head -n -1 | xargs rm -rf
 ```
 
 ### Fix: Missing/Outdated AGENTS.md
-Fetch latest from GitHub and write to `~/.codex/AGENTS.md`:
+Fetch latest from GitHub and write to `~/.copilot/AGENTS.md`:
 ```
-WebFetch(url: "https://raw.githubusercontent.com/Yeachan-Heo/oh-my-codex/main/docs/AGENTS.md", prompt: "Return the complete raw markdown content exactly as-is")
+WebFetch(url: "https://raw.githubusercontent.com/Yeachan-Heo/omx-copilot/main/docs/AGENTS.md", prompt: "Return the complete raw markdown content exactly as-is")
 ```
 
 ### Fix: Legacy Curl-Installed Content
 
-Remove legacy agents/commands plus the historical `~/.agents/skills` tree if it overlaps with the canonical `${CODEX_HOME:-~/.codex}/skills` install:
+Remove legacy agents/commands plus the historical `~/.agents/skills` tree if it overlaps with the canonical `${COPILOT_HOME:-~/.copilot}/skills` install:
 
 ```bash
 # Backup first (optional - ask user)
-# mv ~/.codex/agents ~/.codex/agents.bak
-# mv ~/.codex/commands ~/.codex/commands.bak
+# mv ~/.copilot/agents ~/.copilot/agents.bak
+# mv ~/.copilot/commands ~/.copilot/commands.bak
 # mv ~/.agents/skills ~/.agents/skills.bak
 
 # Or remove directly
-rm -rf ~/.codex/agents
-rm -rf ~/.codex/commands
+rm -rf ~/.copilot/agents
+rm -rf ~/.copilot/commands
 rm -rf ~/.agents/skills
 ```
 
-**Note**: Only remove if these contain oh-my-codex-related files. If user has custom agents/commands/skills, warn them and ask before removing.
+**Note**: Only remove if these contain omx-copilot-related files. If user has custom agents/commands/skills, warn them and ask before removing.
 
 ---
 

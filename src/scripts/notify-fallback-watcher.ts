@@ -1365,7 +1365,7 @@ function sessionDirs(): string[] {
   const now = new Date();
   const today = join(
     homedir(),
-    '.codex',
+    '.copilot',
     'sessions',
     String(now.getUTCFullYear()),
     String(now.getUTCMonth() + 1).padStart(2, '0'),
@@ -1374,7 +1374,7 @@ function sessionDirs(): string[] {
   const yesterdayDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const yesterday = join(
     homedir(),
-    '.codex',
+    '.copilot',
     'sessions',
     String(yesterdayDate.getUTCFullYear()),
     String(yesterdayDate.getUTCMonth() + 1).padStart(2, '0'),

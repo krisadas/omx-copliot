@@ -24,6 +24,7 @@ const WINDOWS_CMD_EXTENSIONS = new Set(['.bat', '.cmd']);
 const WINDOWS_EXTENSION_PRIORITY = ['.exe', '.com', '.cmd', '.bat', '.ps1'];
 const NODE_HOSTED_SCRIPT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs']);
 const WINDOWS_NODE_HOSTED_COMMANDS: Record<string, string[]> = {
+  'copilot': ['node_modules', '.bin', 'copilot'],
   'copilot-cli': ['node_modules', '@openai', 'copilot-cli', 'bin', 'copilot-cli.js'],
 };
 

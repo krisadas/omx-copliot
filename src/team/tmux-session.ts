@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import { existsSync, readFileSync } from 'fs';
 import { isAbsolute, join, resolve } from 'path';
 import {
+  COPILOT_BIN,
   CODEX_BYPASS_FLAG,
   MADMAX_FLAG,
   CONFIG_FLAG,
@@ -679,9 +680,7 @@ function resolveWorkerLaunchArgs(extraArgs: string[] = [], cwd: string = process
   if (wantsBypass && !merged.includes(CODEX_BYPASS_FLAG)) {
     merged.push(CODEX_BYPASS_FLAG);
   }
-  if (shouldBypassDefaultSystemPrompt(env) && !hasModelInstructionsOverride(merged)) {
-    merged.push(CONFIG_FLAG, buildModelInstructionsOverride(cwd, env));
-  }
+  // GitHub Copilot CLI reads AGENTS.md automatically; no -c injection needed.
   return merged;
 }
 
@@ -753,16 +752,19 @@ export function buildWorkerProcessLaunchSpec(
   const effectiveCliLaunchArgs = workerCli === 'copilot-cli' && !cliLaunchArgs.includes(CODEX_BYPASS_FLAG)
     ? [...cliLaunchArgs, CODEX_BYPASS_FLAG]
     : cliLaunchArgs;
-  const workerCodexHomeOverride = typeof effectiveEnv.CODEX_HOME === 'string'
-    ? effectiveEnv.CODEX_HOME.trim()
-    : undefined;
+  const workerCodexHomeOverride = typeof effectiveEnv.COPILOT_HOME === 'string'
+    ? effectiveEnv.COPILOT_HOME.trim()
+    : typeof effectiveEnv.CODEX_HOME === 'string'
+      ? effectiveEnv.CODEX_HOME.trim()
+      : undefined;
   const providerLookupCodexHome = workerCodexHomeOverride
     ? (isAbsolute(workerCodexHomeOverride) ? workerCodexHomeOverride : resolve(cwd, workerCodexHomeOverride))
     : undefined;
 
-  const resolvedCliPath = resolveAbsoluteBinaryPath(workerCli);
+  const effectiveBinary = workerCli === 'copilot-cli' ? COPILOT_BIN : workerCli;
+  const resolvedCliPath = resolveAbsoluteBinaryPath(effectiveBinary);
   const platformSpec = isNativeWindows()
-    ? buildPlatformCommandSpec(workerCli, effectiveCliLaunchArgs, process.platform, effectiveEnv)
+    ? buildPlatformCommandSpec(effectiveBinary, effectiveCliLaunchArgs, process.platform, effectiveEnv)
     : { command: resolvedCliPath, args: effectiveCliLaunchArgs };
   const workerEnv: Record<string, string> = {
     OMX_TEAM_WORKER: `${teamName}/worker-${workerIndex}`,

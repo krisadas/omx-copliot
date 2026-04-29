@@ -1,6 +1,6 @@
 /**
- * Path utilities for oh-my-codex
- * Resolves Codex CLI config, skills, prompts, and state directories
+ * Path utilities for omx-copilot
+ * Resolves Copilot CLI config, skills, prompts, and state directories
  */
 
 import { createHash } from "crypto";
@@ -10,17 +10,13 @@ import { dirname, isAbsolute, join, resolve } from "path";
 import { homedir } from "os";
 import { fileURLToPath } from "url";
 
-/** Copilot CLI home directory (~/.copilot/) with legacy ~/.codex fallback */
-export function codexHome(): string {
-  const explicitHome = process.env.CODEX_HOME || process.env.COPILOT_HOME;
-  if (explicitHome) return explicitHome;
-
-  const copilotHome = join(homedir(), ".copilot");
-  const legacyCodexHome = join(homedir(), ".codex");
-  if (existsSync(copilotHome)) return copilotHome;
-  if (existsSync(legacyCodexHome)) return legacyCodexHome;
-  return copilotHome;
+/** Copilot CLI home directory (~/.copilot/) */
+export function copilotHome(): string {
+  return process.env.COPILOT_HOME || process.env.CODEX_HOME || join(homedir(), ".copilot");
 }
+
+/** @deprecated Use copilotHome() instead */
+export const codexHome = copilotHome;
 
 export const OMX_ENTRY_PATH_ENV = "OMX_ENTRY_PATH";
 export const OMX_STARTUP_CWD_ENV = "OMX_STARTUP_CWD";
@@ -78,44 +74,46 @@ export function rememberOmxLaunchContext(
   }
 }
 
-/** Codex config file path (~/.codex/config.toml) */
-export function codexConfigPath(): string {
-  return join(codexHome(), "config.toml");
+/** Copilot config file path (~/.copilot/config.toml) */
+export function copilotConfigPath(): string {
+  return join(copilotHome(), "config.toml");
 }
 
-/** Codex prompts directory (~/.codex/prompts/) */
-export function codexPromptsDir(): string {
-  return join(codexHome(), "prompts");
+/** @deprecated Use copilotConfigPath() instead */
+export const codexConfigPath = copilotConfigPath;
+
+/** Copilot prompts directory (~/.copilot/prompts/) */
+export function copilotPromptsDir(): string {
+  return join(copilotHome(), "prompts");
 }
 
-/** Codex native agents directory (~/.codex/agents/) */
-export function codexAgentsDir(codexHomeDir?: string): string {
-  return join(codexHomeDir || codexHome(), "agents");
+/** @deprecated Use copilotPromptsDir() instead */
+export const codexPromptsDir = copilotPromptsDir;
+
+/** Copilot native agents directory (~/.copilot/agents/) */
+export function copilotAgentsDir(homeDir?: string): string {
+  return join(homeDir || copilotHome(), "agents");
 }
 
-/** Project-level Copilot native agents directory (./.copilot/agents/) */
-export function projectCodexHomeDir(projectRoot?: string): string {
-  const root = projectRoot || process.cwd();
-  const copilotHome = join(root, ".copilot");
-  const legacyCodexHome = join(root, ".codex");
-  if (existsSync(copilotHome)) return copilotHome;
-  if (existsSync(legacyCodexHome)) return legacyCodexHome;
-  return copilotHome;
+/** @deprecated Use copilotAgentsDir() instead */
+export const codexAgentsDir = copilotAgentsDir;
+
+/** Project-level Copilot native agents directory (.copilot/agents/) */
+export function projectCopilotAgentsDir(projectRoot?: string): string {
+  return join(projectRoot || process.cwd(), ".copilot", "agents");
 }
 
-/** Project-level Copilot native agents directory (./.copilot/agents/) */
-export function projectCodexAgentsDir(projectRoot?: string): string {
-  return join(projectCodexHomeDir(projectRoot), "agents");
-}
+/** @deprecated Use projectCopilotAgentsDir() instead */
+export const projectCodexAgentsDir = projectCopilotAgentsDir;
 
-/** User-level skills directory ($CODEX_HOME/skills, defaults to ~/.codex/skills/) */
+/** User-level skills directory ($COPILOT_HOME/skills, defaults to ~/.copilot/skills/) */
 export function userSkillsDir(): string {
-  return join(codexHome(), "skills");
+  return join(copilotHome(), "skills");
 }
 
-/** Project-level skills directory (./.copilot/skills/) */
+/** Project-level skills directory (.copilot/skills/) */
 export function projectSkillsDir(projectRoot?: string): string {
-  return join(projectCodexHomeDir(projectRoot), "skills");
+  return join(projectRoot || process.cwd(), ".copilot", "skills");
 }
 
 /** Historical legacy user-level skills directory (~/.agents/skills/) */
@@ -250,27 +248,27 @@ async function hashSkillDirectory(
   return hashes;
 }
 
-/** oh-my-codex state directory (.omx/state/) */
+/** omx-copilot state directory (.omx/state/) */
 export function omxStateDir(projectRoot?: string): string {
   return join(projectRoot || process.cwd(), ".omx", "state");
 }
 
-/** oh-my-codex project memory file (.omx/project-memory.json) */
+/** omx-copilot project memory file (.omx/project-memory.json) */
 export function omxProjectMemoryPath(projectRoot?: string): string {
   return join(projectRoot || process.cwd(), ".omx", "project-memory.json");
 }
 
-/** oh-my-codex notepad file (.omx/notepad.md) */
+/** omx-copilot notepad file (.omx/notepad.md) */
 export function omxNotepadPath(projectRoot?: string): string {
   return join(projectRoot || process.cwd(), ".omx", "notepad.md");
 }
 
-/** oh-my-codex plans directory (.omx/plans/) */
+/** omx-copilot plans directory (.omx/plans/) */
 export function omxPlansDir(projectRoot?: string): string {
   return join(projectRoot || process.cwd(), ".omx", "plans");
 }
 
-/** oh-my-codex logs directory (.omx/logs/) */
+/** omx-copilot logs directory (.omx/logs/) */
 export function omxLogsDir(projectRoot?: string): string {
   return join(projectRoot || process.cwd(), ".omx", "logs");
 }

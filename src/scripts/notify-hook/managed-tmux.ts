@@ -247,8 +247,8 @@ async function readManagedPaneCommandState(paneTarget: string): Promise<{ curren
 
 function paneLooksLikeManagedAgent({ currentCommand, startCommand }: { currentCommand: string; startCommand: string }): boolean {
   if (/\bomx\b.*\bhud\b.*--watch/i.test(startCommand)) return false;
-  if (startCommand.includes('copilot-cli')) return true;
-  return currentCommand === 'copilot-cli' || currentCommand === 'node' || currentCommand === 'npx';
+  if (startCommand.includes('copilot-cli') || startCommand.includes('copilot')) return true;
+  return currentCommand === 'copilot-cli' || currentCommand === 'copilot' || currentCommand === 'node' || currentCommand === 'npx';
 }
 export async function resolveManagedCurrentPane(cwd: string, payload: any, { allowTeamWorker = false } = {}): Promise<string> {
   const paneTarget = safeString(process.env.TMUX_PANE || '').trim();

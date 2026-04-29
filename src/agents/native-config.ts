@@ -1,6 +1,6 @@
 /**
  * Native agent config generators for Codex CLI.
- * Writes standalone TOML files under ~/.codex/agents/ or ./.codex/agents/.
+ * Writes standalone TOML files under ~/.copilot/agents/ or ./.copilot/agents/.
  */
 
 import { existsSync, readFileSync } from "fs";
@@ -263,7 +263,7 @@ export function generateStandaloneAgentToml(
   config: GeneratedNativeAgentConfig,
 ): string {
   const lines = [
-    `# oh-my-codex agent: ${config.name}`,
+    `# omx-copilot agent: ${config.name}`,
     `name = "${escapeTomlBasicString(config.name)}"`,
     `description = "${escapeTomlBasicString(config.description)}"`,
   ];
@@ -307,7 +307,7 @@ export function generateAgentToml(
 }
 
 /**
- * Install prompt-backed native agent config .toml files to ~/.codex/agents/
+ * Install prompt-backed native agent config .toml files to ~/.copilot/agents/
  * Returns the number of agent files written.
  */
 export async function installNativeAgentConfigs(

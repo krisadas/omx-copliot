@@ -1,5 +1,5 @@
 /**
- * omxc uninstall - Remove oh-my-codex configuration and installed artifacts
+ * omxc uninstall - Remove omx-copilot configuration and installed artifacts
  */
 
 import { readFile, writeFile, readdir, rm } from "fs/promises";
@@ -72,12 +72,12 @@ function detectOmxConfigArtifacts(config: string): {
 
   const hasTuiSection =
     /^\[tui\]/m.test(config) &&
-    config.includes("oh-my-codex (OMX) Configuration");
+    config.includes("omx-copilot (OMX) Configuration");
 
   const hasTopLevelKeys =
     /^\s*notify\s*=.*node/m.test(config) ||
     /^\s*model_reasoning_effort\s*=/m.test(config) ||
-    /^\s*developer_instructions\s*=.*oh-my-codex/m.test(config);
+    /^\s*developer_instructions\s*=.*omx-copilot/m.test(config);
 
   const hasFeatureFlags =
     /^\s*multi_agent\s*=\s*true/m.test(config) ||
@@ -414,7 +414,7 @@ function printSummary(summary: UninstallSummary, dryRun: boolean): void {
 
   if (totalActions === 0) {
     console.log(
-      "  Nothing to remove. oh-my-codex does not appear to be installed.",
+      "  Nothing to remove. omx-copilot does not appear to be installed.",
     );
   }
 }
@@ -434,7 +434,7 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
   const scope = options.scope ?? readPersistedSetupScope(projectRoot) ?? "user";
   const scopeDirs = resolveScopeDirectories(scope, projectRoot);
 
-  console.log("oh-my-codex uninstall");
+  console.log("omx-copilot uninstall");
   console.log("=====================\n");
   if (dryRun) {
     console.log("[dry-run mode] No files will be modified.\n");
@@ -464,7 +464,7 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
     console.log("[1/5] Skipping config.toml cleanup (--keep-config).");
   } else {
     console.log("[1/5] Cleaning config.toml...");
-    const configResult = await cleanConfig(scopeDirs.codexConfigFile, {
+    const configResult = await cleanConfig(scopeDirs.copilotConfigFile, {
       dryRun,
       verbose,
     });
@@ -474,7 +474,7 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
 
   // Step 2: Remove installed prompts
   console.log("[2/6] Removing native hooks artifact...");
-  summary.hooksFileRemoved = await removeHooksFile(scopeDirs.codexHooksFile, {
+  summary.hooksFileRemoved = await removeHooksFile(scopeDirs.copilotHooksFile, {
     dryRun,
     verbose,
   });
@@ -523,7 +523,7 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
   const agentsMdPath =
     scope === "project"
       ? join(projectRoot, "AGENTS.md")
-      : join(scopeDirs.codexHomeDir, "AGENTS.md");
+      : join(scopeDirs.copilotHomeDir, "AGENTS.md");
   summary.agentsMdRemoved = await removeAgentsMd(agentsMdPath, {
     dryRun,
     verbose,
@@ -553,7 +553,7 @@ export async function uninstall(options: UninstallOptions = {}): Promise<void> {
 
   if (!dryRun) {
     console.log(
-      '\noh-my-codex has been uninstalled. Run "omxc setup" to reinstall.',
+      '\nomx-copilot has been uninstalled. Run "omxc setup" to reinstall.',
     );
   } else {
     console.log("\nRun without --dry-run to apply changes.");

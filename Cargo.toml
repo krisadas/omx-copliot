@@ -14,7 +14,7 @@ version = "0.12.3"
 
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/Yeachan-Heo/oh-my-codex"
+repository = "https://github.com/Yeachan-Heo/omx-copilot"
 
 # The profile that 'dist' will build with
 [profile.dist]

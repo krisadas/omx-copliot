@@ -17,9 +17,9 @@ const PROCESS_EXIT_POLL_MS = 100;
 const SIGTERM_GRACE_MS = 5_000;
 const STALE_TMP_MAX_AGE_MS = 60 * 60 * 1000;
 const OMX_MCP_SERVER_PATTERN = /(?:^|[\\/])dist[\\/]mcp[\\/](?:state|memory|code-intel|trace)-server\.(?:[cm]?js|ts)\b/i;
-const CODEX_PROCESS_PATTERN = /(?:^|[\\/\s])(?:codex|copilot-cli)(?:\.js)?(?:\s|$)|@openai[\\/](?:codex|copilot-cli)/i;
-const OMX_LAUNCH_PROCESS_PATTERN = /(?:^|[\\/\s])omxc(?:\.js)?(?:\s|$)|(?:^|[\\/])(?:bin|dist[\\/]cli)[\\/]omxc\.js(?:\s|$)|oh-my-codex[\\/]dist[\\/]cli[\\/]omxc\.js/i;
-const OMX_TMP_DIRECTORY_PATTERN = /^(omc|omxc|oh-my-codex)-/;
+const CODEX_PROCESS_PATTERN = /(?:^|[\\/\s])(?:codex|copilot|copilot-cli)(?:\.js)?(?:\s|$)|@openai[\\/](?:codex|copilot-cli)/i;
+const OMX_LAUNCH_PROCESS_PATTERN = /(?:^|[\\/\s])omxc(?:\.js)?(?:\s|$)|(?:^|[\\/])(?:bin|dist[\\/]cli)[\\/]omxc\.js(?:\s|$)|omx-copilot[\\/]dist[\\/]cli[\\/]omxc\.js/i;
+const OMX_TMP_DIRECTORY_PATTERN = /^(omc|omxc|omx-copilot)-/;
 
 export interface ProcessEntry {
   pid: number;

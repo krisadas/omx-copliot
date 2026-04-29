@@ -7,7 +7,8 @@ import {
 } from '../config/models.js';
 
 const MADMAX_FLAG = '--madmax';
-const CODEX_BYPASS_FLAG = '--dangerously-bypass-approvals-and-sandbox';
+const CODEX_BYPASS_FLAG = '--allow-all';
+const EFFORT_FLAG = '--effort';
 const MODEL_FLAG = '--model';
 const CONFIG_FLAG = '-c';
 const REASONING_KEY = 'model_reasoning_effort';
@@ -38,6 +39,12 @@ export interface ResolveTeamWorkerLaunchArgsOptions {
 
 function isReasoningOverride(value: string): boolean {
   return new RegExp(`^${REASONING_KEY}\\s*=`).test(value.trim());
+}
+
+function extractReasoningLevel(value: string): TeamReasoningEffort | null {
+  const match = value.match(/model_reasoning_effort\s*=\s*"?(\w+)"?/);
+  if (match) return normalizeOptionalReasoning(match[1]) ?? null;
+  return null;
 }
 
 function isValidModelValue(value: string): boolean {
@@ -99,10 +106,23 @@ export function parseTeamWorkerLaunchArgs(args: string[]): ParsedTeamWorkerLaunc
       continue;
     }
 
+    if (arg === EFFORT_FLAG) {
+      const maybeValue = args[i + 1];
+      if (typeof maybeValue === 'string') {
+        const level = normalizeOptionalReasoning(maybeValue);
+        if (level) {
+          reasoningOverride = level;
+          i += 1;
+        }
+      }
+      continue;
+    }
+
     if (arg === CONFIG_FLAG) {
       const maybeValue = args[i + 1];
       if (typeof maybeValue === 'string' && isReasoningOverride(maybeValue)) {
-        reasoningOverride = maybeValue;
+        const level = extractReasoningLevel(maybeValue);
+        if (level) reasoningOverride = level;
         i += 1;
         continue;
       }
@@ -124,7 +144,7 @@ export function collectInheritableTeamWorkerArgs(codexArgs: string[]): string[] 
 
   const inherited: string[] = [];
   if (parsed.wantsBypass) inherited.push(CODEX_BYPASS_FLAG);
-  if (parsed.reasoningOverride) inherited.push(CONFIG_FLAG, parsed.reasoningOverride);
+  if (parsed.reasoningOverride) inherited.push(EFFORT_FLAG, parsed.reasoningOverride);
   if (parsed.modelOverride) inherited.push(MODEL_FLAG, parsed.modelOverride);
   return inherited;
 }
@@ -139,11 +159,8 @@ export function normalizeTeamWorkerLaunchArgs(
 
   if (parsed.wantsBypass) normalized.push(CODEX_BYPASS_FLAG);
 
-  const selectedReasoning = parsed.reasoningOverride
-    ?? (normalizeOptionalReasoning(preferredReasoning)
-      ? `${REASONING_KEY}="${normalizeOptionalReasoning(preferredReasoning)}"`
-      : null);
-  if (selectedReasoning) normalized.push(CONFIG_FLAG, selectedReasoning);
+  const selectedReasoning = parsed.reasoningOverride ?? normalizeOptionalReasoning(preferredReasoning) ?? null;
+  if (selectedReasoning) normalized.push(EFFORT_FLAG, selectedReasoning);
 
   const selectedModel = normalizeOptionalModel(preferredModel) ?? normalizeOptionalModel(parsed.modelOverride);
   if (selectedModel) normalized.push(MODEL_FLAG, selectedModel);

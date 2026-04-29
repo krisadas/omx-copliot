@@ -89,7 +89,7 @@ export function isApprovedExecutionFollowupShortcut(
 function defaultPromptDirs(projectRoot: string): string[] {
   return [
     join(projectRoot, 'prompts'),
-    join(projectRoot, '.codex', 'prompts'),
+    join(projectRoot, '.copilot', 'prompts'),
     join(packageRoot(), 'prompts'),
     codexPromptsDir(),
   ];

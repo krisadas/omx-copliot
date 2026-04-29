@@ -1,6 +1,6 @@
 {
   "name": "omx-copilot",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Multi-agent orchestration layer for CoPilot CLI",
   "type": "module",
   "main": "dist/index.js",
@@ -54,21 +54,21 @@
     "src/scripts/"
   ],
   "keywords": [
-    "codex",
-    "openai",
+    "copilot",
+    "github-copilot",
     "cli",
     "agents",
     "orchestration",
     "multi-agent"
   ],
-  "author": "Krisada S.",
+  "author": "Yeachan Heo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/krisadas/omx-copliot.git"
+    "url": "git+https://github.com/Yeachan-Heo/omx-copilot.git"
   },
-  "homepage": "https://krisadas.github.io/omx-copliot",
+  "homepage": "https://yeachan-heo.github.io/omx-copilot",
   "bugs": {
-    "url": "https://github.com/krisadas/omx-copliot/issues"
+    "url": "https://github.com/Yeachan-Heo/omx-copilot/issues"
   },
   "license": "MIT",
   "dependencies": {

@@ -1,11 +1,11 @@
 ---
 name: omx-setup
-description: Setup and configure oh-my-codex using current CLI behavior
+description: Setup and configure omx-copilot using current CLI behavior
 ---
 
 # OMX Setup
 
-Use this skill when users want to install or refresh oh-my-codex for the **current project plus user-level OMX directories**.
+Use this skill when users want to install or refresh omx-copilot for the **current project plus user-level OMX directories**.
 
 ## Command
 
@@ -42,10 +42,10 @@ Supported setup flags (current implementation):
 - Local project orchestration file is `./AGENTS.md` (project root).
 - If `AGENTS.md` exists and `--force` is not used, interactive TTY runs ask whether to overwrite. Non-interactive runs preserve the file.
 - Scope targets:
-  - `user`: user directories (`~/.codex`, `~/.codex/skills`, `~/.omx/agents`)
-  - `project`: local directories (`./.codex`, `./.codex/skills`, `./.omx/agents`)
-- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${CODEX_HOME:-~/.codex}/skills`, current setup prints a cleanup hint because Codex may show duplicate skill entries until the legacy tree is removed or archived.
-- If persisted scope is `project`, `omx` launch automatically uses `CODEX_HOME=./.codex` unless user explicitly overrides `CODEX_HOME`.
+  - `user`: user directories (`~/.copilot`, `~/.copilot/skills`, `~/.omx/agents`)
+  - `project`: local directories (`./.codex`, `./.copilot/skills`, `./.omx/agents`)
+- Migration hint: in `user` scope, if historical `~/.agents/skills` still exists alongside `${COPILOT_HOME:-~/.copilot}/skills`, current setup prints a cleanup hint because Copilot CLI may show duplicate skill entries until the legacy tree is removed or archived.
+- If persisted scope is `project`, `omx` launch automatically uses `COPILOT_HOME=./.codex` unless user explicitly overrides `COPILOT_HOME`.
 - With `--force`, AGENTS overwrite may still be skipped if an active OMX session is detected (safety guard).
 - Legacy persisted scope values (`project-local`) are automatically migrated to `project` with a one-time warning.
 
@@ -72,7 +72,7 @@ From `omx doctor`, expect:
 - Skills installed (scope-dependent: user or project)
 - AGENTS.md found in project root
 - `.omx/state` exists
-- OMX MCP servers configured in scope target `config.toml` (`~/.codex/config.toml` or `./.codex/config.toml`)
+- OMX MCP servers configured in scope target `config.toml` (`~/.copilot/config.toml` or `./.copilot/config.toml`)
 
 ## Troubleshooting
 

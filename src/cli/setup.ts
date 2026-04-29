@@ -1,5 +1,5 @@
 /**
- * omxc setup - Automated installation of oh-my-codex
+ * omxc setup - Automated installation of omx-copilot
  * Installs skills, prompts, MCP servers config, and AGENTS.md
  */
 
@@ -18,10 +18,10 @@ import { spawnSync } from "child_process";
 import { createInterface } from "readline/promises";
 import { homedir } from "os";
 import {
-  codexHome,
-  codexConfigPath,
-  codexPromptsDir,
-  codexAgentsDir,
+  copilotHome,
+  copilotConfigPath,
+  copilotPromptsDir,
+  copilotAgentsDir,
   userSkillsDir,
   omxStateDir,
   detectLegacySkillRootOverlap,
@@ -29,7 +29,7 @@ import {
   omxLogsDir,
 } from "../utils/paths.js";
 import { buildMergedConfig, getRootModelName } from "../config/generator.js";
-import { buildManagedCodexHooksConfig } from "../config/codex-hooks.js";
+import { buildManagedCopilotHooksConfig } from "../config/codex-hooks.js";
 import {
   getLegacyUnifiedMcpRegistryCandidate,
   getUnifiedMcpRegistryCandidates,
@@ -53,6 +53,7 @@ import {
   upsertAgentsModelTable,
 } from "../utils/agents-model-table.js";
 import { spawnPlatformCommandSync } from "../utils/platform-command.js";
+import { COPILOT_BIN } from "./constants.js";
 
 interface SetupOptions {
   codexVersionProbe?: () => string | null;
@@ -81,12 +82,18 @@ export const SETUP_SCOPES = ["user", "project"] as const;
 export type SetupScope = (typeof SETUP_SCOPES)[number];
 
 export interface ScopeDirectories {
-  codexConfigFile: string;
-  codexHomeDir: string;
-  codexHooksFile: string;
+  copilotConfigFile: string;
+  copilotHomeDir: string;
+  copilotHooksFile: string;
   nativeAgentsDir: string;
   promptsDir: string;
   skillsDir: string;
+  /** @deprecated Use copilotConfigFile */
+  codexConfigFile?: string;
+  /** @deprecated Use copilotHomeDir */
+  codexHomeDir?: string;
+  /** @deprecated Use copilotHooksFile */
+  codexHooksFile?: string;
 }
 
 interface SetupCategorySummary {
@@ -136,16 +143,14 @@ const PROJECT_GITIGNORE_ENTRIES = [
   "!.copilot/prompts/",
   "!.copilot/prompts/**",
 ] as const;
-const LEGACY_PROJECT_GITIGNORE_ENTRIES = [".codex/"] as const;
+const LEGACY_PROJECT_GITIGNORE_ENTRIES = [".codex/", ".copilot/"] as const;
 
 function applyScopePathRewritesToAgentsTemplate(
   content: string,
   scope: SetupScope,
 ): string {
   if (scope !== "project") return content;
-  return content
-    .replaceAll("~/.codex", "./.copilot")
-    .replaceAll("./.codex", "./.copilot");
+  return content.replaceAll("~/.copilot", "./.copilot");
 }
 
 interface PersistedSetupScope {
@@ -352,7 +357,7 @@ async function buildLegacySkillOverlapNotice(
     return {
       shouldWarn: true,
       message:
-        `Legacy ~/.agents/skills still exists (${overlap.legacySkillCount} skills) alongside canonical ${overlap.canonicalDir}. Codex may still discover both roots; archive or remove ~/.agents/skills if Enable/Disable Skills shows duplicates.`,
+        `Legacy ~/.agents/skills still exists (${overlap.legacySkillCount} skills) alongside canonical ${overlap.canonicalDir}. Copilot CLI may still discover both roots; archive or remove ~/.agents/skills if Enable/Disable Skills shows duplicates.`,
     };
   }
 
@@ -362,14 +367,14 @@ async function buildLegacySkillOverlapNotice(
   return {
     shouldWarn: true,
     message:
-      `Detected ${overlap.overlappingSkillNames.length} overlapping skill names between canonical ${overlap.canonicalDir} and legacy ${overlap.legacyDir}.${mismatchSuffix} Remove or archive ~/.agents/skills after confirming ${overlap.canonicalDir} is the version you want Codex to load.`,
+      `Detected ${overlap.overlappingSkillNames.length} overlapping skill names between canonical ${overlap.canonicalDir} and legacy ${overlap.legacyDir}.${mismatchSuffix} Remove or archive ~/.agents/skills after confirming ${overlap.canonicalDir} is the version you want Copilot CLI to load.`,
   };
 }
 
 function logCategorySummary(name: string, summary: SetupCategorySummary): void {
   console.log(
     `  ${name}: updated=${summary.updated}, unchanged=${summary.unchanged}, ` +
-    `backed_up=${summary.backedUp}, skipped=${summary.skipped}, removed=${summary.removed}`,
+      `backed_up=${summary.backedUp}, skipped=${summary.skipped}, removed=${summary.removed}`,
   );
 }
 
@@ -385,22 +390,22 @@ export function resolveScopeDirectories(
   projectRoot: string,
 ): ScopeDirectories {
   if (scope === "project") {
-    const codexHomeDir = join(projectRoot, ".copilot");
+    const copilotHomeDir = join(projectRoot, ".copilot");
     return {
-      codexConfigFile: join(codexHomeDir, "config.toml"),
-      codexHomeDir,
-      codexHooksFile: join(codexHomeDir, "hooks.json"),
-      nativeAgentsDir: join(codexHomeDir, "agents"),
-      promptsDir: join(codexHomeDir, "prompts"),
-      skillsDir: join(codexHomeDir, "skills"),
+      copilotConfigFile: join(copilotHomeDir, "config.toml"),
+      copilotHomeDir,
+      copilotHooksFile: join(copilotHomeDir, "hooks.json"),
+      nativeAgentsDir: join(copilotHomeDir, "agents"),
+      promptsDir: join(copilotHomeDir, "prompts"),
+      skillsDir: join(copilotHomeDir, "skills"),
     };
   }
   return {
-    codexConfigFile: codexConfigPath(),
-    codexHomeDir: codexHome(),
-    codexHooksFile: join(codexHome(), "hooks.json"),
-    nativeAgentsDir: codexAgentsDir(),
-    promptsDir: codexPromptsDir(),
+    copilotConfigFile: copilotConfigPath(),
+    copilotHomeDir: copilotHome(),
+    copilotHooksFile: join(copilotHome(), "hooks.json"),
+    nativeAgentsDir: copilotAgentsDir(),
+    promptsDir: copilotPromptsDir(),
     skillsDir: userSkillsDir(),
   };
 }
@@ -424,7 +429,7 @@ async function readPersistedSetupPreferences(
       if (migrated) {
         console.warn(
           `[omxc] Migrating persisted setup scope "${parsed.scope}" → "${migrated}" ` +
-          `(see issue #243: simplified to user/project).`,
+            `(see issue #243: simplified to user/project).`,
         );
         persisted.scope = migrated;
       }
@@ -503,7 +508,7 @@ function semverGte(
 }
 
 function probeInstalledCodexVersion(): string | null {
-  const { result } = spawnPlatformCommandSync("copilot-cli", ["--version"], {
+  const { result } = spawnPlatformCommandSync(COPILOT_BIN, ["--version"], {
     encoding: "utf-8",
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -622,7 +627,7 @@ async function ensureProjectGitignore(
 
   if (options.verbose) {
     const changedDetails = [
-      normalized.removed ? "removed legacy .codex/" : "",
+      normalized.removed ? "removed legacy .codex/ / .copilot/" : "",
       missingEntries.length > 0 ? missingEntries.join(", ") : "",
     ]
       .filter(Boolean)
@@ -676,7 +681,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
   // Step 1: Ensure directories exist
   console.log("[1/8] Creating directories...");
   const dirs = [
-    scopeDirs.codexHomeDir,
+    scopeDirs.copilotHomeDir,
     scopeDirs.promptsDir,
     scopeDirs.skillsDir,
     scopeDirs.nativeAgentsDir,
@@ -820,7 +825,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     console.log(`  warning: ${warning}`);
   }
   const managedConfig = await updateManagedConfig(
-    scopeDirs.codexConfigFile,
+    scopeDirs.copilotConfigFile,
     pkgRoot,
     sharedMcpRegistry,
     summary.config,
@@ -836,23 +841,23 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
       { dryRun, verbose },
     );
   }
-  console.log(`  Config refresh complete (${scopeDirs.codexConfigFile}).\n`);
+  console.log(`  Config refresh complete (${scopeDirs.copilotConfigFile}).\n`);
 
   const hooksConfig = JSON.stringify(
-    buildManagedCodexHooksConfig(pkgRoot),
+    buildManagedCopilotHooksConfig(pkgRoot),
     null,
     2,
   ) + "\n";
   await syncManagedContent(
     hooksConfig,
-    scopeDirs.codexHooksFile,
+    scopeDirs.copilotHooksFile,
     summary.config,
     backupContext,
     { dryRun, verbose },
-    `native hooks ${scopeDirs.codexHooksFile}`,
+    `native hooks ${scopeDirs.copilotHooksFile}`,
   );
   console.log(
-    `  Native Copilot hooks refresh complete (${scopeDirs.codexHooksFile}).\n`,
+    `  Native Copilot hooks refresh complete (${scopeDirs.copilotHooksFile}).\n`,
   );
 
   // Step 5.5: Verify team CLI interop surface is available.
@@ -872,7 +877,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
   const agentsMdDst =
     resolvedScope.scope === "project"
       ? join(projectRoot, "AGENTS.md")
-      : join(scopeDirs.codexHomeDir, "AGENTS.md");
+      : join(scopeDirs.copilotHomeDir, "AGENTS.md");
   const agentsMdExists = existsSync(agentsMdDst);
 
   // Guard: refuse to overwrite project-root AGENTS.md during active session
@@ -885,7 +890,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
   if (existsSync(agentsMdSrc)) {
     const content = await readFile(agentsMdSrc, "utf-8");
     const modelTableContext = resolveAgentsModelTableContext(resolvedConfig, {
-      codexHomeOverride: scopeDirs.codexHomeDir,
+      codexHomeOverride: scopeDirs.copilotHomeDir,
     });
     const rewritten = upsertAgentsModelTable(
       addGeneratedAgentsMarker(
@@ -917,8 +922,8 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
       summary.agentsMd.skipped += 1;
       console.log(
         "  WARNING: Active omxc session detected (pid " +
-        activeSession?.pid +
-        ").",
+          activeSession?.pid +
+          ").",
       );
       console.log(
         "  Skipping AGENTS.md overwrite to avoid corrupting runtime overlay.",
@@ -936,7 +941,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
       console.log(
         resolvedScope.scope === "project"
           ? "  Refreshed AGENTS.md model capability table in project root."
-          : `  Refreshed AGENTS.md model capability table in ${scopeDirs.codexHomeDir}.`,
+          : `  Refreshed AGENTS.md model capability table in ${scopeDirs.copilotHomeDir}.`,
       );
     } else {
       const result = await syncManagedAgentsContent(
@@ -956,13 +961,13 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
         console.log(
           resolvedScope.scope === "project"
             ? "  Generated AGENTS.md in project root."
-            : `  Generated AGENTS.md in ${scopeDirs.codexHomeDir}.`,
+            : `  Generated AGENTS.md in ${scopeDirs.copilotHomeDir}.`,
         );
       } else if (result === "unchanged") {
         console.log(
           resolvedScope.scope === "project"
             ? "  AGENTS.md already up to date in project root."
-            : `  AGENTS.md already up to date in ${scopeDirs.codexHomeDir}.`,
+            : `  AGENTS.md already up to date in ${scopeDirs.copilotHomeDir}.`,
         );
       } else if (agentsMdExists) {
         console.log(
@@ -1000,7 +1005,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
   if (managedConfig.omxManagesTui) {
     console.log("  StatusLine configured in config.toml via [tui] section.");
   } else {
-    console.log("  Codex CLI >= 0.107.0 manages [tui]; OMX left that section untouched.");
+    console.log("  Copilot CLI >= 0.107.0 manages [tui]; OMX left that section untouched.");
   }
   console.log();
 
@@ -1040,7 +1045,7 @@ export async function setup(options: SetupOptions = {}): Promise<void> {
     '  6. "omxc explore" and "omxc sparkshell" can hydrate native release binaries on first use; source installs still allow repo-local fallbacks and OMX_EXPLORE_BIN / OMX_SPARKSHELL_BIN overrides',
   );
   if (isGitHubCliConfigured()) {
-    console.log("\nSupport the project: gh repo star Yeachan-Heo/oh-my-codex");
+    console.log("\nSupport the project: gh repo star Yeachan-Heo/omx-copilot");
   }
 }
 
@@ -1089,10 +1094,9 @@ async function cleanupLegacySkillPromptShims(
 }
 
 function isGitHubCliConfigured(): boolean {
-  const result = spawnSync("gh", ["auth", "status"], {
-    stdio: "ignore",
-    windowsHide: true,
-  });
+  const result = spawnSync("gh", ["auth", "status"], { stdio: "ignore",
+      windowsHide: true,
+    });
   return result.status === 0;
 }
 

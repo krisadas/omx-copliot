@@ -1,7 +1,7 @@
 /**
  * OpenClaw Configuration Reader
  *
- * Reads OpenClaw config from the notifications.openclaw key in ~/.codex/.omx-config.json.
+ * Reads OpenClaw config from the notifications.openclaw key in ~/.copilot/.omx-config.json.
  * Also supports generic alias shapes under notifications.custom_cli_command
  * and notifications.custom_webhook_command, normalized to OpenClaw runtime config.
  *
@@ -151,7 +151,7 @@ function isValidOpenClawConfig(raw: OpenClawConfig | undefined): raw is OpenClaw
  *
  * Config is read from:
  * 1. OMX_OPENCLAW_CONFIG env var path (separate file), if set
- * 2. notifications.openclaw key in ~/.codex/.omx-config.json
+ * 2. notifications.openclaw key in ~/.copilot/.omx-config.json
  * 3. notifications.custom_cli_command / notifications.custom_webhook_command aliases
  */
 export function getOpenClawConfig(): OpenClawConfig | null {

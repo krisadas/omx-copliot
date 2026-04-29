@@ -5,9 +5,9 @@ IF BLOCKED, TRY AN ALTERNATIVE APPROACH. ONLY ASK WHEN TRULY AMBIGUOUS OR DESTRU
 USE COPILOT CLI NATIVE SUBAGENTS FOR INDEPENDENT PARALLEL SUBTASKS WHEN THAT IMPROVES THROUGHPUT. THIS IS COMPLEMENTARY TO OMX TEAM MODE.
 <!-- END AUTONOMY DIRECTIVE -->
 
-# oh-my-codex - Intelligent Multi-Agent Orchestration
+# omx-copilot - Intelligent Multi-Agent Orchestration
 
-You are running with oh-my-codex (OMX), a coordination layer for Copilot CLI.
+You are running with omx-copilot (OMX), a coordination layer for Copilot CLI.
 This AGENTS.md is the top-level operating contract for the workspace.
 Role prompts under `prompts/*.md` are narrower execution surfaces. They must follow this file, not override it.
 
@@ -212,22 +212,22 @@ Runtime availability gate:
 
 | Keyword(s) | Skill | Action |
 |-------------|-------|--------|
-| "ralph", "don't stop", "must complete", "keep going" | `$ralph` | Runtime-only: read `~/.codex/skills/ralph/SKILL.md`, execute persistence loop only inside OMX CLI/runtime |
-| "autopilot", "build me", "I want a" | `$autopilot` | Runtime-only: read `~/.codex/skills/autopilot/SKILL.md`, execute autonomous pipeline only inside OMX CLI/runtime |
-| "ultrawork", "ulw", "parallel" | `$ultrawork` | Runtime-only: read `~/.codex/skills/ultrawork/SKILL.md`, execute parallel agents only inside OMX CLI/runtime |
-| "ultraqa" | `$ultraqa` | Runtime-only: read `~/.codex/skills/ralph/SKILL.md`, run persistent completion and verification loop only inside OMX CLI/runtime (UltraQA compatibility alias) |
-| "analyze", "investigate" | `$analyze` | Read `~/.codex/prompts/debugger.md`, run root-cause analysis (analyze compatibility alias) |
-| "plan this", "plan the", "let's plan" | `$plan` | Read `~/.codex/skills/plan/SKILL.md`, start planning workflow |
-| "interview", "deep interview", "gather requirements", "interview me", "don't assume", "ouroboros" | `$deep-interview` | Read `~/.codex/skills/deep-interview/SKILL.md`, run Ouroboros-inspired Socratic ambiguity-gated interview workflow |
-| "ralplan", "consensus plan" | `$ralplan` | Read `~/.codex/skills/ralplan/SKILL.md`, start consensus planning with RALPLAN-DR structured deliberation (short by default, `--deliberate` for high-risk) |
-| "team", "swarm", "coordinated team", "coordinated swarm" | `$team` | Runtime-only: read `~/.codex/skills/team/SKILL.md`, start tmux-based team orchestration only inside OMX CLI/runtime (swarm compatibility alias) |
-| "ecomode", "eco", "budget" | `$ecomode` | Runtime-only: read `~/.codex/skills/ultrawork/SKILL.md`, execute cost-aware parallel workflow only inside OMX CLI/runtime (ecomode compatibility alias) |
-| "cancel", "stop", "abort" | `$cancel` | Read `~/.codex/skills/cancel/SKILL.md`, cancel active modes |
-| "tdd", "test first" | `$tdd` | Read `~/.codex/prompts/test-engineer.md`, run test-first workflow (tdd compatibility alias) |
-| "fix build", "type errors" | `$build-fix` | Read `~/.codex/prompts/build-fixer.md`, fix build errors with minimal diff (build-fix compatibility alias) |
-| "review code", "code review", "code-review" | `$code-review` | Read `~/.codex/skills/code-review/SKILL.md`, run code review |
-| "security review" | `$security-review` | Read `~/.codex/skills/security-review/SKILL.md`, run security audit |
-| "web-clone", "clone site", "clone website", "copy webpage" | `$web-clone` | Read `~/.codex/skills/web-clone/SKILL.md`, start website cloning pipeline |
+| "ralph", "don't stop", "must complete", "keep going" | `$ralph` | Runtime-only: read `~/.copilot/skills/ralph/SKILL.md`, execute persistence loop only inside OMX CLI/runtime |
+| "autopilot", "build me", "I want a" | `$autopilot` | Runtime-only: read `~/.copilot/skills/autopilot/SKILL.md`, execute autonomous pipeline only inside OMX CLI/runtime |
+| "ultrawork", "ulw", "parallel" | `$ultrawork` | Runtime-only: read `~/.copilot/skills/ultrawork/SKILL.md`, execute parallel agents only inside OMX CLI/runtime |
+| "ultraqa" | `$ultraqa` | Runtime-only: read `~/.copilot/skills/ralph/SKILL.md`, run persistent completion and verification loop only inside OMX CLI/runtime (UltraQA compatibility alias) |
+| "analyze", "investigate" | `$analyze` | Read `~/.copilot/prompts/debugger.md`, run root-cause analysis (analyze compatibility alias) |
+| "plan this", "plan the", "let's plan" | `$plan` | Read `~/.copilot/skills/plan/SKILL.md`, start planning workflow |
+| "interview", "deep interview", "gather requirements", "interview me", "don't assume", "ouroboros" | `$deep-interview` | Read `~/.copilot/skills/deep-interview/SKILL.md`, run Ouroboros-inspired Socratic ambiguity-gated interview workflow |
+| "ralplan", "consensus plan" | `$ralplan` | Read `~/.copilot/skills/ralplan/SKILL.md`, start consensus planning with RALPLAN-DR structured deliberation (short by default, `--deliberate` for high-risk) |
+| "team", "swarm", "coordinated team", "coordinated swarm" | `$team` | Runtime-only: read `~/.copilot/skills/team/SKILL.md`, start tmux-based team orchestration only inside OMX CLI/runtime (swarm compatibility alias) |
+| "ecomode", "eco", "budget" | `$ecomode` | Runtime-only: read `~/.copilot/skills/ultrawork/SKILL.md`, execute cost-aware parallel workflow only inside OMX CLI/runtime (ecomode compatibility alias) |
+| "cancel", "stop", "abort" | `$cancel` | Read `~/.copilot/skills/cancel/SKILL.md`, cancel active modes |
+| "tdd", "test first" | `$tdd` | Read `~/.copilot/prompts/test-engineer.md`, run test-first workflow (tdd compatibility alias) |
+| "fix build", "type errors" | `$build-fix` | Read `~/.copilot/prompts/build-fixer.md`, fix build errors with minimal diff (build-fix compatibility alias) |
+| "review code", "code review", "code-review" | `$code-review` | Read `~/.copilot/skills/code-review/SKILL.md`, run code review |
+| "security review" | `$security-review` | Read `~/.copilot/skills/security-review/SKILL.md`, run security audit |
+| "web-clone", "clone site", "clone website", "copy webpage" | `$web-clone` | Read `~/.copilot/skills/web-clone/SKILL.md`, start website cloning pipeline |
 
 Detection rules:
 - Keywords are case-insensitive and match anywhere in the user message.

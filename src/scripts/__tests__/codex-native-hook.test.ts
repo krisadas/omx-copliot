@@ -5,7 +5,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
-import { buildManagedCodexHooksConfig } from "../../config/codex-hooks.js";
+import { buildManagedCopilotHooksConfig } from "../../config/codex-hooks.js";
 import { initTeamState } from "../../team/state.js";
 import {
   dispatchCodexNativeHook,
@@ -23,7 +23,7 @@ const TEAM_STOP_COMMIT_GUIDANCE =
 
 describe("codex native hook config", () => {
   it("builds the expected managed hooks.json shape", () => {
-    const config = buildManagedCodexHooksConfig("/tmp/omx");
+    const config = buildManagedCopilotHooksConfig("/tmp/omx");
     assert.deepEqual(Object.keys(config.hooks), [
       "SessionStart",
       "PreToolUse",

@@ -84,8 +84,8 @@ This file is generated for a live OMX team worker run and is disposable.
 ## Protocol
 1. Read your inbox at \`${options.teamStateRoot}/team/${options.teamName}/workers/${options.workerName}/inbox.md\`.
 2. Load the worker skill from the first existing path:
-   - \`${"${CODEX_HOME:-~/.codex}"}/skills/worker/SKILL.md\`
-   - \`${options.leaderCwd}/.codex/skills/worker/SKILL.md\`
+   - \`${"${COPILOT_HOME:-~/.copilot}"}/skills/worker/SKILL.md\`
+   - \`${options.leaderCwd}/.copilot/skills/worker/SKILL.md\`
    - \`${options.leaderCwd}/skills/worker/SKILL.md\`
 3. Send startup ACK before task work:
 
@@ -299,8 +299,8 @@ You are a team worker in team "${teamName}". Your identity and assigned tasks ar
 ## Protocol
 1. Read your inbox file at the path provided in your first instruction
 2. Load the worker skill instructions from the first path that exists:
-   - \`${"${CODEX_HOME:-~/.codex}"}/skills/worker/SKILL.md\`
-   - \`<leader_cwd>/.codex/skills/worker/SKILL.md\`
+   - \`${"${COPILOT_HOME:-~/.copilot}"}/skills/worker/SKILL.md\`
+   - \`<leader_cwd>/.copilot/skills/worker/SKILL.md\`
    - \`<leader_cwd>/skills/worker/SKILL.md\` (repo fallback)
 3. Send an ACK to the lead using CLI interop \`omxc team api send-message --json\` (to_worker="leader-fixed") once initialized
 4. Resolve canonical team state root in this order:
@@ -349,7 +349,7 @@ When your mailbox receives a message, process delivery explicitly:
 - If you need to modify a shared file, report to the lead by writing to your status file with state "blocked"
 - Do NOT write lifecycle fields (\`status\`, \`owner\`, \`result\`, \`error\`) directly in task files; use claim-safe lifecycle APIs
 - If blocked, write {"state": "blocked", "reason": "..."} to your status file
-- You may spawn Codex native subagents when parallel execution improves throughput.
+- You may spawn Copilot CLI native subagents when parallel execution improves throughput.
 - Use subagents only for independent, bounded subtasks that can run safely within this worker pane.
 </team_worker_protocol>
 ${TEAM_OVERLAY_END}`;
@@ -431,7 +431,7 @@ function dropShadowedSkillReferenceLines(
 
 /**
  * Write a team-scoped model instructions file that composes user-level
- * CODEX_HOME AGENTS.md, the project's AGENTS.md (if any), and the worker
+ * COPILOT_HOME AGENTS.md, the project's AGENTS.md (if any), and the worker
  * overlay. This avoids mutating the source AGENTS.md files directly.
  *
  * Returns the absolute path to the composed file.
@@ -685,8 +685,8 @@ ${taskList}
 ## Instructions
 
 1. Load and follow the worker skill from the first existing path:
-   - \`${"${CODEX_HOME:-~/.codex}"}/skills/worker/SKILL.md\`
-   - \`${leaderCwd}/.codex/skills/worker/SKILL.md\`
+   - \`${"${COPILOT_HOME:-~/.copilot}"}/skills/worker/SKILL.md\`
+   - \`${leaderCwd}/.copilot/skills/worker/SKILL.md\`
    - \`${leaderCwd}/skills/worker/SKILL.md\` (repo fallback)
 2. Send startup ACK to the lead mailbox BEFORE any task work (run this exact command):
 
@@ -732,7 +732,7 @@ ${buildVerificationSection("each assigned task")}
 - Only edit files described in your task descriptions
 - Do NOT edit files that belong to other workers
 - If you need to modify a shared/common file, write \`{"state": "blocked", "reason": "need to edit shared file X"}\` to your status file and wait
-- You may spawn Codex native subagents when parallel execution improves throughput.
+- You may spawn Copilot CLI native subagents when parallel execution improves throughput.
 - Use subagents only for independent, bounded subtasks that can run safely within this worker pane.
 ${specializationSection}`;
 }

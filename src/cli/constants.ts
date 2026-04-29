@@ -1,5 +1,8 @@
+/** The GitHub Copilot CLI binary name */
+export const COPILOT_BIN = process.env.COPILOT_CLI_BIN ?? 'copilot';
+
 export const MADMAX_FLAG = '--madmax';
-export const CODEX_BYPASS_FLAG = '--dangerously-bypass-approvals-and-sandbox';
+export const CODEX_BYPASS_FLAG = '--allow-all';
 export const HIGH_REASONING_FLAG = '--high';
 export const XHIGH_REASONING_FLAG = '--xhigh';
 export const SPARK_FLAG = '--spark';

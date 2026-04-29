@@ -620,7 +620,7 @@ function dropShadowedSkillReferenceLines(
 }
 
 /**
- * Build a session-scoped AGENTS.md that combines user-level CODEX_HOME
+ * Build a session-scoped AGENTS.md that combines user-level COPILOT_HOME
  * instructions, project instructions (if any), and the runtime overlay,
  * without mutating the source AGENTS.md files.
  */

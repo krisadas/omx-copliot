@@ -167,7 +167,7 @@ Why bad: This is an exploration/brainstorming request. Respond conversationally 
 <Advanced>
 ## Configuration
 
-Optional settings in `~/.codex/config.toml`:
+Optional settings in `~/.copilot/config.toml`:
 
 ```toml
 [omx.autopilot]

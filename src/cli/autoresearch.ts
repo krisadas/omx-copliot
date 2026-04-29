@@ -24,7 +24,7 @@ import {
   listAutoresearchDeepInterviewResultPaths,
   resolveAutoresearchDeepInterviewResult,
 } from './autoresearch-intake.js';
-import { CODEX_BYPASS_FLAG, MADMAX_FLAG } from './constants.js';
+import { COPILOT_BIN, CODEX_BYPASS_FLAG, MADMAX_FLAG } from './constants.js';
 import { restoreStandaloneHudPane, enableMouseScrolling } from '../team/tmux-session.js';
 import { resolveOmxEntryPath } from '../utils/paths.js';
 
@@ -151,7 +151,7 @@ export function normalizeAutoresearchCodexArgs(codexArgs: readonly string[]): st
 function runAutoresearchTurn(worktreePath: string, instructionsFile: string, codexArgs: string[]): void {
   const prompt = readFileSync(instructionsFile, 'utf-8');
   const launchArgs = ['exec', ...normalizeAutoresearchCodexArgs(codexArgs), '-'];
-  const result = spawnSync('copilot-cli', launchArgs, {
+  const result = spawnSync(COPILOT_BIN, launchArgs, {
     cwd: worktreePath,
     stdio: ['pipe', 'inherit', 'inherit'],
     input: prompt,

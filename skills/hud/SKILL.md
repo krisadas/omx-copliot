@@ -9,7 +9,7 @@ scope: ".omx/**"
 
 The OMX HUD uses a two-layer architecture:
 
-1. **Layer 1 - Codex built-in statusLine**: Real-time TUI footer showing model, git branch, and context usage. Configured via `[tui] status_line` in `~/.codex/config.toml`. Zero code required.
+1. **Layer 1 - Codex built-in statusLine**: Real-time TUI footer showing model, git branch, and context usage. Configured via `[tui] status_line` in `~/.copilot/config.toml`. Zero code required.
 
 2. **Layer 2 - `omx hud` CLI command**: Shows OMX-specific orchestration state (ralph, ultrawork, autopilot, team, pipeline, ecomode, turns). Reads `.omx/state/` files.
 
@@ -44,13 +44,13 @@ The OMX HUD uses a two-layer architecture:
 ## Setup
 
 `omx setup` automatically configures both layers:
-- Adds `[tui] status_line` to `~/.codex/config.toml` (Layer 1)
+- Adds `[tui] status_line` to `~/.copilot/config.toml` (Layer 1)
 - Writes `.omx/hud-config.json` with default preset (Layer 2)
 - Default preset is `focused`; if HUD/statusline changes do not appear, restart Codex CLI once.
 
 ## Layer 1: Codex Built-in StatusLine
 
-Configured in `~/.codex/config.toml`:
+Configured in `~/.copilot/config.toml`:
 ```toml
 [tui]
 status_line = ["model-with-reasoning", "git-branch", "context-remaining"]

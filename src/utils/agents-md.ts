@@ -1,6 +1,6 @@
 export const OMX_GENERATED_AGENTS_MARKER = '<!-- omx:generated:agents-md -->'
 const OMX_GENERATED_AGENTS_TITLE =
-  '# oh-my-codex - Intelligent Multi-Agent Orchestration'
+  '# omx-copilot - Intelligent Multi-Agent Orchestration'
 const AUTONOMY_DIRECTIVE_END_MARKER = '<!-- END AUTONOMY DIRECTIVE -->'
 
 export function isOmxGeneratedAgentsMd(content: string): boolean {

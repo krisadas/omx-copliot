@@ -16,7 +16,7 @@ const AGENTS_USAGE = [
   '  omxc agents edit <name> [--scope user|project]',
   '  omxc agents remove <name> [--scope user|project] [--force]',
   '',
-  'Manage Copilot native agent TOML files under ~/.copilot/agents/ or ./.copilot/agents/.',
+  'Manage Codex native agent TOML files under ~/.copilot/agents/ or ./.copilot/agents/.',
   '',
   'Notes:',
   '  - list shows project + user agents by default',
@@ -82,9 +82,7 @@ function inferMutationScope(cwd = process.cwd()): AgentScope {
       // fall through
     }
   }
-  return existsSync(join(cwd, '.copilot')) || existsSync(join(cwd, '.codex'))
-    ? 'project'
-    : 'user';
+  return existsSync(join(cwd, '.copilot')) ? 'project' : 'user';
 }
 
 function getAgentFilePath(name: string, scope: AgentScope, cwd = process.cwd()): string {

@@ -183,8 +183,8 @@ export function isPaneRunningShell(paneCurrentCommand: any): boolean {
   return SHELL_COMMANDS.has(base);
 }
 
-// Codex agent commands — do NOT include 'claude' (that's Claude Code CLI, a different tool)
-const AGENT_COMMANDS = new Set(['node', 'copilot-cli', 'npx']);
+// Copilot agent commands — do NOT include 'claude' (that's Claude Code CLI, a different tool)
+const AGENT_COMMANDS = new Set(['node', 'copilot', 'copilot-cli', 'npx']);
 
 function isHudStartCommand(startCommand: string): boolean {
   return /\bomx\b.*\bhud\b.*--watch/i.test(startCommand);
@@ -241,7 +241,7 @@ export function resolveCodexPane(): string {
       const paneId = parts[0];
       const startCmd = (parts[2] || '').toLowerCase();
       if (!paneId) continue;
-      if (startCmd.includes('copilot-cli') && !isHudStartCommand(startCmd)) {
+      if ((startCmd.includes('copilot-cli') || startCmd.includes('copilot')) && !isHudStartCommand(startCmd)) {
         return paneId;
       }
     }
